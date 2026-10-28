@@ -1,0 +1,39 @@
+<!--
+  PulseWatch MSI (WiX Toolset v5).
+  Build: wix build installer\PulseWatch.wxs -arch x64 -d Version=2.0.0 -d PublishDir=<publish folder> -o PulseWatch.msi
+  Per-machine install into Program Files, Start-menu shortcut, upgrades replace older versions.
+  Uninstall also removes the "start with Windows" task the app may have created; settings in %AppData%\PulseWatch stay.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="PulseWatch" Manufacturer="PulseWatch" Version="$(var.Version)"
+           UpgradeCode="5E35EF60-6018-4258-92FD-5B07F9ACDD69" Scope="perMachine" Compressed="yes">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of PulseWatch is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon" SourceFile="$(sys.SOURCEFILEDIR)..\native\Assets\pulsewatch.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/AirZone1/PulseWatch" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="PulseWatch">
+        <Files Include="$(var.PublishDir)\**" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="StartMenuShortcut">
+        <Shortcut Id="AppShortcut" Name="PulseWatch" Description="PulseWatch Control Center"
+                  Target="[INSTALLFOLDER]PulseWatch.exe" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon" />
+        <RegistryValue Root="HKLM" Key="Software\PulseWatch" Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <!-- remove the logon task created by "Start with Windows" (only on a real uninstall, not on upgrade) -->
+    <CustomAction Id="RemoveStartupTask" Directory="INSTALLFOLDER" Execute="deferred" Impersonate="no" Return="ignore"
+                  ExeCommand="&quot;[System64Folder]schtasks.exe&quot; /Delete /TN &quot;PulseWatch Control Center&quot; /F" />
+    <InstallExecuteSequence>
+      <Custom Action="RemoveStartupTask" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+    </InstallExecuteSequence>
+  </Package>
+</Wix>

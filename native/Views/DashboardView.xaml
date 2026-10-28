@@ -1,0 +1,238 @@
+<UserControl x:Class="PulseWatch.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:PulseWatch.Controls"
+             xmlns:v="clr-namespace:PulseWatch.Views">
+    <UserControl.Resources>
+        <v:FractionToWidth x:Key="FracW"/>
+        <Style x:Key="StatLabel" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="StatValue" TargetType="TextBlock" BasedOn="{StaticResource Num}">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,6,24,24">
+        <StackPanel>
+            <!-- ───── Row 1: CPU · GPU · Cooling ───── -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="1.05*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- CPU -->
+                <Border Style="{StaticResource CardBorder}" Cursor="Hand" MouseLeftButtonUp="Cpu_Click">
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Top">
+                            <TextBlock Text="&#xE950;" Style="{StaticResource Icon}" Foreground="{StaticResource Accent}" Margin="0,0,8,0"/>
+                            <TextBlock Text="{v:T He=מעבד, En=Processor}" Style="{StaticResource H2}"/>
+                            <TextBlock x:Name="CpuName" Style="{StaticResource Caption}" HorizontalAlignment="Right" VerticalAlignment="Center" FlowDirection="LeftToRight" TextTrimming="CharacterEllipsis"/>
+                        </DockPanel>
+                        <Grid Margin="0,14,0,0" DockPanel.Dock="Top">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid Width="132" Height="132">
+                                <c:RingGauge x:Name="CpuGauge" Min="20" Max="100" Warn="75" Hot="88" Thickness="11"/>
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock x:Name="CpuTemp" Text="—" Style="{StaticResource Big}" FontSize="32" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="°C · Tctl" Style="{StaticResource Caption}" HorizontalAlignment="Center" FlowDirection="LeftToRight"/>
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Grid.Column="1" Margin="14,4,0,0" VerticalAlignment="Center">
+                                <DockPanel Margin="0,4"><TextBlock Text="{v:T He=עומס, En=Load}" Style="{StaticResource StatLabel}"/><TextBlock x:Name="CpuLoad" Style="{StaticResource StatValue}"/></DockPanel>
+                                <DockPanel Margin="0,4" ToolTip="{v:T He=התדר שהליבות באמת עובדות בו (Effective) — כולל זמני שינה, En=The clock the cores really run at (effective) — includes sleep time}"><TextBlock Text="{v:T He=תדר אפקטיבי, En=Effective clock}" Style="{StaticResource StatLabel}"/><TextBlock x:Name="CpuClock" Style="{StaticResource StatValue}"/></DockPanel>
+                                <DockPanel Margin="0,4"><TextBlock Text="{v:T He=הספק, En=Power}" Style="{StaticResource StatLabel}"/><TextBlock x:Name="CpuPower" Style="{StaticResource StatValue}"/></DockPanel>
+                                <DockPanel Margin="0,4"><TextBlock Text="{v:T He=שיא מאז ההפעלה, En=Peak this session}" Style="{StaticResource StatLabel}"/><TextBlock x:Name="CpuPeak" Style="{StaticResource StatValue}"/></DockPanel>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock DockPanel.Dock="Top" Text="{v:T He=טמפרטורה · 5 דקות, En=Temperature · 5 minutes}" Style="{StaticResource Caption}" FontSize="11" Margin="0,14,0,4"/>
+                        <c:TimeChart x:Name="CpuSpark" Compact="True" MinHeight="54" MinSpan="15"/>
+                    </DockPanel>
+                </Border>
+
+                <!-- GPU -->
+                <Border Grid.Column="2" Style="{StaticResource CardBorder}" Cursor="Hand" MouseLeftButtonUp="Gpu_Click">
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Top">
+                            <TextBlock Text="&#xE7F4;" Style="{StaticResource Icon}" Foreground="{StaticResource Good}" Margin="0,0,8,0"/>
+                            <TextBlock Text="{v:T He=כרטיס מסך, En=Graphics card}" Style="{StaticResource H2}"/>
+                            <TextBlock x:Name="GpuName" Style="{StaticResource Caption}" HorizontalAlignment="Right" VerticalAlignment="Center" FlowDirection="LeftToRight" TextTrimming="CharacterEllipsis"/>
+                        </DockPanel>
+                        <Grid Margin="0,14,0,0" DockPanel.Dock="Top">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid Width="132" Height="132">
+                                <c:RingGauge x:Name="GpuGauge" Min="20" Max="95" Warn="75" Hot="84" Thickness="11"/>
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock x:Name="GpuTemp" Text="—" Style="{StaticResource Big}" FontSize="32" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="°C · Core" Style="{StaticResource Caption}" HorizontalAlignment="Center" FlowDirection="LeftToRight"/>
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                                <DockPanel Margin="0,3" ToolTip="{v:T He='Hot Spot: הנקודה החמה ביותר על שבב כרטיס המסך · VRAM: שבבי הזיכרון של הכרטיס', En='Hot Spot: hottest point on the GPU die · VRAM: the memory chips on the card'}"><TextBlock Text="{v:T He=GPU Hot Spot / VRAM, En=GPU Hot Spot / VRAM}" Style="{StaticResource StatLabel}"/><TextBlock x:Name="GpuHot" Style="{StaticResource StatValue}"/></DockPanel>
+                                <DockPanel Margin="0,3"><TextBlock Text="{v:T He=עומס, En=Load}" Style="{StaticResource StatLabel}"/><TextBlock x:Name="GpuLoad" Style="{StaticResource StatValue}"/></DockPanel>
+                                <DockPanel Margin="0,3"><TextBlock Text="{v:T He=ליבה / זיכרון, En=Core / memory}" Style="{StaticResource StatLabel}"/><TextBlock x:Name="GpuClock" Style="{StaticResource StatValue}"/></DockPanel>
+                                <DockPanel Margin="0,3"><TextBlock Text="{v:T He=הספק / מגבלה, En=Power / limit}" Style="{StaticResource StatLabel}"/><TextBlock x:Name="GpuPower" Style="{StaticResource StatValue}"/></DockPanel>
+                                <DockPanel Margin="0,3"><TextBlock Text="{v:T He=מאווררים, En=Fans}" Style="{StaticResource StatLabel}"/><TextBlock x:Name="GpuFan" Style="{StaticResource StatValue}"/></DockPanel>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock DockPanel.Dock="Top" Text="{v:T He=טמפרטורה · 5 דקות, En=Temperature · 5 minutes}" Style="{StaticResource Caption}" FontSize="11" Margin="0,14,0,4"/>
+                        <c:TimeChart x:Name="GpuSpark" Compact="True" MinHeight="54" MinSpan="15"/>
+                    </DockPanel>
+                </Border>
+
+                <!-- Cooling -->
+                <Border Grid.Column="4" Style="{StaticResource CardBorder}">
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                            <TextBlock Text="&#xEC4A;" Style="{StaticResource Icon}" Foreground="{StaticResource Accent2}" Margin="0,0,8,0"/>
+                            <TextBlock Text="{v:T He=קירור, En=Cooling}" Style="{StaticResource H2}"/>
+                            <Button Content="{v:T He=עריכת עקומות, En=Edit curves}" Style="{StaticResource Ghost}" Padding="10,4" FontSize="12" HorizontalAlignment="Right" Click="Cooling_Click"/>
+                        </DockPanel>
+                        <Grid DockPanel.Dock="Top" Margin="0,0,0,10" x:Name="AioPanel">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource SubCard}">
+                                <StackPanel>
+                                    <TextBlock Text="{v:T He=משאבה, En=Pump}" Style="{StaticResource Caption}"/>
+                                    <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
+                                        <TextBlock x:Name="PumpRpm" Text="—" Style="{StaticResource Big}" FontSize="22"/>
+                                        <TextBlock Text=" RPM" Style="{StaticResource Caption}" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource SubCard}">
+                                <StackPanel>
+                                    <TextBlock Text="{v:T He=רדיאטור, En=Radiator}" Style="{StaticResource Caption}"/>
+                                    <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
+                                        <TextBlock x:Name="RadRpm" Text="—" Style="{StaticResource Big}" FontSize="22"/>
+                                        <TextBlock Text=" RPM" Style="{StaticResource Caption}" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        <ItemsControl x:Name="FanList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="86"/>
+                                            <ColumnDefinition Width="54"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontSize="12.5" TextTrimming="CharacterEllipsis"/>
+                                            <Grid Height="4" Margin="0,5,0,0" x:Name="track">
+                                                <Border CornerRadius="2" Background="{StaticResource Line}"/>
+                                                <Border CornerRadius="2" Background="{Binding ModeBrush}" HorizontalAlignment="Left">
+                                                    <Border.Width>
+                                                        <MultiBinding Converter="{StaticResource FracW}">
+                                                            <Binding Path="Bar"/>
+                                                            <Binding Path="ActualWidth" ElementName="track"/>
+                                                        </MultiBinding>
+                                                    </Border.Width>
+                                                </Border>
+                                            </Grid>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding Rpm}" Style="{StaticResource Num}" FontSize="12.5" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding Pct}" Style="{StaticResource Caption}" FlowDirection="LeftToRight" HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <!-- ───── Row 2: charts ───── -->
+            <Grid Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.6*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource CardBorder}">
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                            <TextBlock Text="{v:T He=טמפרטורות, En=Temperatures}" Style="{StaticResource H2}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <RadioButton Style="{StaticResource Chip}" GroupName="span" Content="{v:T He=דקה, En=1 min}" Tag="60" Checked="Span_Checked" Padding="10,3"/>
+                                <RadioButton Style="{StaticResource Chip}" GroupName="span" Content="{v:T He=5 דקות, En=5 min}" Tag="300" Checked="Span_Checked" Padding="10,3" IsChecked="True"/>
+                                <RadioButton Style="{StaticResource Chip}" GroupName="span" Content="{v:T He=15 דקות, En=15 min}" Tag="900" Checked="Span_Checked" Padding="10,3"/>
+                                <RadioButton Style="{StaticResource Chip}" GroupName="span" Content="{v:T He=שעה, En=1 hour}" Tag="3600" Checked="Span_Checked" Padding="10,3"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <WrapPanel DockPanel.Dock="Bottom" x:Name="TempLegend" Margin="0,8,0,0"/>
+                        <c:TimeChart x:Name="TempChart" Height="230" MinSpan="20"/>
+                    </DockPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource CardBorder}">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="{v:T He=עומס, En=Load}" Style="{StaticResource H2}" Margin="0,0,0,8"/>
+                        <WrapPanel DockPanel.Dock="Bottom" x:Name="LoadLegend" Margin="0,8,0,0"/>
+                        <c:TimeChart x:Name="LoadChart" Height="230" YMin="0" YMax="100" MinSpan="100" FillFirst="True"/>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <!-- ───── Row 3: small tiles ───── -->
+            <UniformGrid Columns="4" Margin="-8,16,-8,0">
+                <Border Style="{StaticResource CardBorder}" Margin="8,0">
+                    <StackPanel>
+                        <TextBlock Text="{v:T He=זיכרון RAM, En=Memory (RAM)}" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="RamText" Text="—" Style="{StaticResource Big}" FontSize="22" HorizontalAlignment="Left" Margin="0,4,0,0"/>
+                        <TextBlock x:Name="RamSub" Style="{StaticResource Caption}" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardBorder}" Margin="8,0">
+                    <StackPanel>
+                        <TextBlock Text="{v:T He=זיכרון גרפי VRAM, En=Video memory (VRAM)}" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="VramText" Text="—" Style="{StaticResource Big}" FontSize="22" HorizontalAlignment="Left" Margin="0,4,0,0"/>
+                        <TextBlock x:Name="VramSub" Style="{StaticResource Caption}" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardBorder}" Margin="8,0">
+                    <StackPanel>
+                        <TextBlock Text="{v:T He=כוננים · טמפרטורה, En=Drives · temperature}" Style="{StaticResource Caption}"/>
+                        <ItemsControl x:Name="DriveTemps" Margin="0,6,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <DockPanel Margin="0,1">
+                                        <TextBlock Text="{Binding Item1}" Style="{StaticResource Caption}" TextTrimming="CharacterEllipsis" MaxWidth="170" FlowDirection="LeftToRight"/>
+                                        <TextBlock Text="{Binding Item2}" Style="{StaticResource Num}" FontSize="13" HorizontalAlignment="Right"/>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardBorder}" Margin="8,0">
+                    <StackPanel>
+                        <TextBlock Text="{v:T He=רשת, En=Network}" Style="{StaticResource Caption}"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="&#xE896;" Style="{StaticResource Icon}" Foreground="{StaticResource Accent}" Margin="0,0,6,0"/>
+                            <TextBlock x:Name="NetDown" Text="—" Style="{StaticResource Num}" FontSize="18"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="&#xE898;" Style="{StaticResource Icon}" Foreground="{StaticResource Accent2}" Margin="0,0,6,0"/>
+                            <TextBlock x:Name="NetUp" Text="—" Style="{StaticResource Num}" FontSize="18"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

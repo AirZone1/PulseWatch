@@ -1,0 +1,45 @@
+<UserControl x:Class="PulseWatch.Views.NvidiaView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:PulseWatch.Views">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,6,24,24">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.5*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel>
+                <Border Style="{StaticResource CardBorder}">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="{v:T He=החזר הכל לברירת מחדל, En=Restore all defaults}" Style="{StaticResource Danger}" Click="ResetAll_Click" VerticalAlignment="Center"/>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal"><TextBlock Text="{v:T He=הגדרות תלת-מימד גלובליות, En=Global 3D settings}" Style="{StaticResource H2}"/><v:HelpTip Help="{v:T He=אותן הגדרות כמו ב-NVIDIA Control Panel ← ניהול הגדרות תלת-מימד ← הגדרות גלובליות. נשמרות בדרייבר ופועלות גם כש-PulseWatch סגור., En=The same settings as NVIDIA Control Panel → Manage 3D settings → Global settings. Stored in the driver; they work even when PulseWatch is closed.}"/></StackPanel>
+                            <TextBlock x:Name="DriverText" Style="{StaticResource Hint}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <TextBlock x:Name="LoadingText" Text="{v:T He=טוען הגדרות מהדרייבר…, En=Loading settings from the driver…}" Style="{StaticResource Caption}" Margin="4,16,0,0"/>
+                <StackPanel x:Name="SettingsHost"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2">
+                <Border Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8"><TextBlock Text="{v:T He=רוויית צבע · Digital Vibrance, En=Digital vibrance}" Style="{StaticResource H2}"/><v:HelpTip Help="{v:T He='מגביר את עוצמת הצבעים בכל מסך. 50% היא ברירת המחדל. PulseWatch מחיל את הערך מחדש בכל הפעלה.', En='Boosts colour saturation per display. 50% is the default. PulseWatch re-applies it at every start.'}"/></StackPanel>
+                        <StackPanel x:Name="DisplaysHost"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10"><TextBlock Text="{v:T He=המלצות מהירות, En=Quick presets}" Style="{StaticResource H2}"/><v:HelpTip Help="{v:T He=מחיל שילוב מוכר של הגדרות בלחיצה אחת. תמיד אפשר לחזור לברירת מחדל., En=Applies a well-known combination in one click. You can always go back to defaults.}"/></StackPanel>
+                        <Button Content="{v:T He=משחקים תחרותיים · השהיה מינימלית, En=Competitive gaming · lowest latency}" Click="PresetCompetitive_Click" ToolTip="{v:T He=Low Latency מופעל · ביצועים מרביים · V-Sync כבוי · קצב רענון מקסימלי · סינון טקסטורות ביצועים, En=Low Latency on · max performance · V-Sync off · highest refresh rate · performance texture filtering}" HorizontalAlignment="Stretch" Margin="0,0,0,8"/>
+                        <Button Content="{v:T He=G-SYNC · חלק וללא קריעה, En=G-SYNC · smooth and tear-free}" x:Name="GsyncBtn" Click="PresetGsync_Click" ToolTip="{v:T He=V-Sync מופעל · Low Latency מופעל · הגבלת FPS לקצב הרענון פחות 3, En=V-Sync on · Low Latency on · FPS cap at refresh rate minus 3}" HorizontalAlignment="Stretch" Margin="0,0,0,8"/>
+                        <Button Content="{v:T He=איכות · אנאיזוטרופי 16x, En=Quality · 16x anisotropic}" Click="PresetQuality_Click" ToolTip="{v:T He=סינון אנאיזוטרופי 16x גלובלי · סינון טקסטורות איכות גבוהה, En=Global 16x anisotropic filtering · high-quality texture filtering}" HorizontalAlignment="Stretch" Margin="0,0,0,8"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

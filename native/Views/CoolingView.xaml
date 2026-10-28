@@ -1,0 +1,268 @@
+<UserControl x:Class="PulseWatch.Views.CoolingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:PulseWatch.Controls"
+             xmlns:v="clr-namespace:PulseWatch.Views">
+    <UserControl.Resources>
+        <v:FractionToWidth x:Key="FracW"/>
+    </UserControl.Resources>
+
+    <Grid Margin="24,6,24,24">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="330"/>
+            <ColumnDefinition Width="16"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ───── Channel list ───── -->
+        <Border Style="{StaticResource CardBorder}" Padding="10,14">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="8,0,8,10">
+                    <TextBlock Text="{v:T He=ערוצי מאווררים, En=Fan channels}" Style="{StaticResource H2}"/>
+                    <TextBlock x:Name="ProfileHint" Style="{StaticResource Hint}" Margin="0,4,0,0"/>
+                </StackPanel>
+                <CheckBox x:Name="ShowHidden" DockPanel.Dock="Bottom" Content="{v:T He=הצג ערוצים מוסתרים, En=Show hidden channels}" Margin="10,10,0,0" FontSize="12" Foreground="{StaticResource Muted}" Checked="ShowHidden_Changed" Unchecked="ShowHidden_Changed"/>
+                <ListBox x:Name="ChannelList" Background="Transparent" Foreground="{StaticResource Text}" BorderThickness="0" SelectionChanged="ChannelList_SelectionChanged"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0,0,0,6"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="b" CornerRadius="10" Padding="12,10" Background="Transparent" BorderThickness="1" BorderBrush="Transparent" Cursor="Hand">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="b" Property="Background" Value="{StaticResource HoverSoft}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="b" Property="Background" Value="{StaticResource CardHi}"/>
+                                                <Setter TargetName="b" Property="BorderBrush" Value="#4422D3EE"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <DockPanel>
+                                    <TextBlock Text="&#xE7BA;" FontSize="12" Foreground="{StaticResource Warn}" Margin="0,0,6,0" DockPanel.Dock="Left">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource Icon}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Warn}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding Rpm}" Style="{StaticResource Num}" FontSize="13" DockPanel.Dock="Right" Margin="8,0,0,0"/>
+                                    <TextBlock Text="{Binding Name}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,3,0,0">
+                                    <TextBlock Text="{Binding Pct}" Style="{StaticResource Caption}" DockPanel.Dock="Right" FlowDirection="LeftToRight" Margin="8,0,0,0"/>
+                                    <TextBlock Text="{Binding Mode}" Foreground="{Binding ModeBrush}" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                </DockPanel>
+                                <Grid Height="3" Margin="0,7,0,0" x:Name="track">
+                                    <Border CornerRadius="2" Background="{StaticResource Line}"/>
+                                    <Border CornerRadius="2" Background="{Binding ModeBrush}" HorizontalAlignment="Left">
+                                        <Border.Width>
+                                            <MultiBinding Converter="{StaticResource FracW}">
+                                                <Binding Path="Bar"/>
+                                                <Binding Path="ActualWidth" ElementName="track"/>
+                                            </MultiBinding>
+                                        </Border.Width>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Text="{Binding Group}" Style="{StaticResource Caption}" FontSize="11" Foreground="{StaticResource Faint}" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <!-- ───── Editor ───── -->
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="Editor">
+                <Border Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBox x:Name="NameBox" FontSize="18" FontWeight="SemiBold" Background="Transparent" BorderThickness="0" Padding="0"
+                                         LostFocus="NameBox_Commit" KeyDown="NameBox_KeyDown" ToolTip="{v:T He='לחץ כדי לשנות שם (למשל CPU_FAN · מאוורר אחורי)', En='Click to rename (e.g. CPU_FAN · rear fan)'}"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                    <TextBlock x:Name="GroupText" Style="{StaticResource Caption}"/>
+                                    <v:HelpTip x:Name="ChannelHelp"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                                <Button x:Name="IdentifyBtn" Click="Identify_Click" Margin="0,0,8,0" ToolTip="{v:T He=מסובב את הערוץ ל-100% למשך 6 שניות כדי לזהות איזה מאוורר מחובר אליו, En=Spins this channel at 100% for 6 seconds so you can see which fan it is}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE7B3;" FontFamily="{StaticResource IconFont}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{v:T He=זהה מאוורר, En=Identify fan}"/>
+                                    </StackPanel>
+                                </Button>
+                                <CheckBox x:Name="HiddenBox" Style="{StaticResource Switch}" Content="{v:T He=הסתר, En=Hide}" VerticalAlignment="Center" Checked="Hidden_Changed" Unchecked="Hidden_Changed"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <UniformGrid Columns="4" Margin="-5,16,-5,0">
+                            <Border Style="{StaticResource SubCard}" Margin="5,0">
+                                <StackPanel>
+                                    <TextBlock Text="{v:T He=מהירות, En=Speed}" Style="{StaticResource Caption}"/>
+                                    <TextBlock x:Name="LiveRpm" Text="—" Style="{StaticResource Big}" FontSize="22" HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource SubCard}" Margin="5,0">
+                                <StackPanel>
+                                    <TextBlock Text="{v:T He=עוצמה כרגע, En=Duty now}" Style="{StaticResource Caption}"/>
+                                    <TextBlock x:Name="LivePct" Text="—" Style="{StaticResource Big}" FontSize="22" HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource SubCard}" Margin="5,0">
+                                <StackPanel>
+                                    <TextBlock Text="{v:T He=טמפרטורת מקור, En=Source temp}" Style="{StaticResource Caption}"/>
+                                    <TextBlock x:Name="LiveTemp" Text="—" Style="{StaticResource Big}" FontSize="22" HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource SubCard}" Margin="5,0">
+                                <StackPanel>
+                                    <TextBlock Text="{v:T He=מצב, En=State}" Style="{StaticResource Caption}"/>
+                                    <TextBlock x:Name="LiveState" Text="—" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+
+                        <Border x:Name="ErrorBox" Visibility="Collapsed" Background="{StaticResource WarnSoft}" CornerRadius="8" Padding="12,8" Margin="0,12,0,0">
+                            <TextBlock x:Name="ErrorText" TextWrapping="Wrap" Foreground="#FDE68A" FontSize="12.5"/>
+                        </Border>
+
+                        <!-- Mode -->
+                        <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                        <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="ModeAuto" Style="{StaticResource Chip}" GroupName="mode" Content="{v:T He=אוטומטי, En=Auto}" Checked="Mode_Checked" Tag="Auto"/>
+                                <RadioButton x:Name="ModeFixed" Style="{StaticResource Chip}" GroupName="mode" Content="{v:T He=מהירות קבועה, En=Fixed speed}" Checked="Mode_Checked" Tag="Fixed"/>
+                                <RadioButton x:Name="ModeCurve" Style="{StaticResource Chip}" GroupName="mode" Content="{v:T He=עקומת טמפרטורה, En=Temperature curve}" Checked="Mode_Checked" Tag="Curve"/>
+                            </StackPanel>
+                        </Border>
+                        <v:HelpTip x:Name="ModeHelp" Margin="10,0,0,0"/>
+                        </StackPanel>
+
+                        <!-- Fixed -->
+                        <StackPanel x:Name="FixedPanel" Margin="0,14,0,0">
+                            <DockPanel>
+                                <TextBlock x:Name="FixedValue" Style="{StaticResource Num}" FontSize="20" DockPanel.Dock="Right" Width="64" TextAlignment="Right"/>
+                                <Slider x:Name="FixedSlider" Minimum="0" Maximum="100" SmallChange="1" LargeChange="5" IsSnapToTickEnabled="True" TickFrequency="1"
+                                        ValueChanged="FixedSlider_ValueChanged" VerticalAlignment="Center"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Curve -->
+                <Border x:Name="CurvePanel" Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock Text="{v:T He=עקומה, En=Curve}" Style="{StaticResource H2}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <ComboBox x:Name="CurveCombo" Width="230" SelectionChanged="CurveCombo_SelectionChanged"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Style="{StaticResource IconBtn}" Content="&#xE710;" ToolTip="{v:T He=עקומה חדשה, En=New curve}" Click="NewCurve_Click"/>
+                                <Button Style="{StaticResource IconBtn}" Content="&#xE8C8;" ToolTip="{v:T He=שכפל עקומה, En=Duplicate curve}" Click="DupCurve_Click"/>
+                                <Button Style="{StaticResource IconBtn}" Content="&#xE8AC;" ToolTip="{v:T He=שנה שם, En=Rename}" Click="RenameCurve_Click"/>
+                                <Button Style="{StaticResource IconBtn}" Content="&#xE74D;" ToolTip="{v:T He=מחק עקומה, En=Delete curve}" Click="DeleteCurve_Click"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <StackPanel x:Name="RenamePanel" Orientation="Horizontal" Margin="0,8,0,0" Visibility="Collapsed">
+                            <TextBox x:Name="RenameBox" Width="230" KeyDown="RenameBox_KeyDown"/>
+                            <Button Content="{v:T He=שמור, En=Save}" Style="{StaticResource Primary}" Margin="8,0,0,0" Padding="12,5" Click="RenameSave_Click"/>
+                        </StackPanel>
+                        <TextBlock x:Name="CurveShared" Style="{StaticResource Hint}" Margin="0,6,0,0"/>
+
+                        <!-- Sources -->
+                        <StackPanel Margin="0,14,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{v:T He=חיישן הטמפרטורה:, En=Temperature sensor:}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <ComboBox x:Name="SourceCombo" Width="300" SelectionChanged="SourceCombo_SelectionChanged"
+                                          ToolTip="{v:T He=החיישן שהעקומה עוקבת אחריו. לבחירה ב-CPU מומלץ Tctl, En=The sensor this curve follows. For the CPU Tctl is recommended}"/>
+                                <ComboBox x:Name="AddSourceCombo" Width="220" Margin="10,0,0,0" SelectionChanged="AddSource_SelectionChanged"
+                                          ToolTip="{v:T He=הוסף חיישן נוסף — העקומה תגיב לחם מביניהם (למשל CPU וגם GPU למאוורר מארז), En=Add another sensor — the curve reacts to the hottest one (e.g. CPU and GPU for a case fan)}"/>
+                            </StackPanel>
+                            <WrapPanel x:Name="SourceChips" Margin="0,8,0,0"/>
+                        </StackPanel>
+
+                        <DockPanel x:Name="DrivePanel" Margin="0,12,0,0" Visibility="Collapsed">
+                            <TextBlock Text="{v:T He=הכונן שמתחת למאוורר:, En=Drive under this fan:}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <ComboBox x:Name="DriveCombo" Width="260" HorizontalAlignment="Left" SelectionChanged="DriveCombo_SelectionChanged"
+                                      ToolTip="{v:T He=העקומה תעקוב אחרי הטמפרטורה של הכונן הזה בלבד (לפי הדגם — לא משתנה גם אם Windows ממספר מחדש את הדיסקים), En=The curve follows this drive only (by model — stays correct even if Windows renumbers the disks)}"/>
+                        </DockPanel>
+
+                        <c:FanCurveEditor x:Name="CurveEditor" Height="330" Margin="0,14,0,0"/>
+
+                        <WrapPanel Margin="0,10,0,0">
+                            <TextBlock Text="{v:T He=תבניות:, En=Presets:}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <Button Content="{v:T He=שקט, En=Silent}" Tag="silent" Click="Preset_Click" Margin="0,0,6,0" Padding="12,5"/>
+                            <Button Content="{v:T He=מאוזן, En=Balanced}" Tag="balanced" Click="Preset_Click" Margin="0,0,6,0" Padding="12,5"/>
+                            <Button Content="{v:T He=ביצועים, En=Performance}" Tag="performance" Click="Preset_Click" Margin="0,0,6,0" Padding="12,5"/>
+                            <Button Content="{v:T He=שטוח 50%, En=Flat 50%}" Tag="flat" Click="Preset_Click" Margin="0,0,6,0" Padding="12,5"/>
+                            <Button Content="{v:T He=Zero RPM עד 50°, En=Zero RPM below 50°}" Tag="zero" Click="Preset_Click" Margin="0,0,6,0" Padding="12,5"/>
+                        </WrapPanel>
+
+                        <Grid Margin="0,18,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <DockPanel><StackPanel Orientation="Horizontal"><TextBlock Text="{v:T He=היסטרזיס, En=Hysteresis}" Style="{StaticResource Caption}"/><v:HelpTip Help="{v:T He=כמה מעלות הטמפרטורה צריכה לרדת לפני שהמאוורר מאט — מונע קפיצות, En=How far the temperature must drop before the fan slows — stops hunting}"/></StackPanel><TextBlock x:Name="HystValue" Style="{StaticResource Num}" FontSize="13" HorizontalAlignment="Right"/></DockPanel>
+                                <Slider x:Name="HystSlider" Minimum="0" Maximum="10" TickFrequency="0.5" IsSnapToTickEnabled="True" ValueChanged="Smoothing_Changed"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <DockPanel><StackPanel Orientation="Horizontal"><TextBlock Text="{v:T He=האצה, En=Ramp up}" Style="{StaticResource Caption}"/><v:HelpTip Help="{v:T He=כמה אחוזים בשנייה המאוורר מורשה לעלות, En=How many percent per second the fan may speed up}"/></StackPanel><TextBlock x:Name="UpValue" Style="{StaticResource Num}" FontSize="13" HorizontalAlignment="Right"/></DockPanel>
+                                <Slider x:Name="UpSlider" Minimum="1" Maximum="40" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Smoothing_Changed"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <DockPanel><StackPanel Orientation="Horizontal"><TextBlock Text="{v:T He=האטה, En=Ramp down}" Style="{StaticResource Caption}"/><v:HelpTip Help="{v:T He=האטה איטית שומרת על שקט אחרי עומס קצר, En=A slow ramp down keeps things quiet after short loads}"/></StackPanel><TextBlock x:Name="DownValue" Style="{StaticResource Num}" FontSize="13" HorizontalAlignment="Right"/></DockPanel>
+                                <Slider x:Name="DownSlider" Minimum="1" Maximum="40" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Smoothing_Changed"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- History -->
+                <Border Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="{v:T He=היסטוריה · 10 דקות, En=History · 10 minutes}" Style="{StaticResource H2}" Margin="0,0,0,8"/>
+                        <WrapPanel DockPanel.Dock="Bottom" x:Name="HistLegend" Margin="0,8,0,0"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <c:TimeChart x:Name="RpmChart" Height="170" SpanSeconds="600" MinSpan="200"/>
+                            <c:TimeChart x:Name="SrcChart" Grid.Column="2" Height="170" SpanSeconds="600" MinSpan="15"/>
+                        </Grid>
+                    </DockPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

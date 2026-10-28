@@ -1,0 +1,16 @@
+# Only PulseWatch 2.0 is published: the native app, the installer and the docs.
+/*
+!/.gitignore
+!/.github/
+!/native/
+!/installer/
+!/README.md
+!/THIRD-PARTY-NOTICES.md
+!/update_native.bat
+
+# build output
+native/bin/
+native/obj/
+publish/
+dist/
+*.user

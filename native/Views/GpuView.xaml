@@ -1,0 +1,365 @@
+<UserControl x:Class="PulseWatch.Views.GpuView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:PulseWatch.Controls"
+             xmlns:v="clr-namespace:PulseWatch.Views">
+    <UserControl.Resources>
+        <Style x:Key="TileVal" TargetType="TextBlock" BasedOn="{StaticResource Num}">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+        </Style>
+        <Style x:Key="ValBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Width" Value="76"/>
+            <Setter Property="FlowDirection" Value="LeftToRight"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style x:Key="Unit" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+            <Setter Property="Margin" Value="6,0,0,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="FlowDirection" Value="LeftToRight"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,6,24,24">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="1.05*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ───── V/F curve ───── -->
+            <Border Grid.Row="0" Grid.ColumnSpan="3" Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource Primary}" Click="Apply_Click" Padding="16,6" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE73E;" FontFamily="{StaticResource IconFont}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="{v:T He=החל על הכרטיס, En=Apply to card}"/>
+                            </StackPanel>
+                        </Button>
+                        <Border x:Name="CurveDirtyPill" DockPanel.Dock="Right" Style="{StaticResource Pill}" Background="{StaticResource AccentSoft}" VerticalAlignment="Center" Visibility="Collapsed">
+                            <TextBlock x:Name="CurveDirtyText" Foreground="{StaticResource Accent}" FontSize="12"/>
+                        </Border>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{v:T He=עקומת מתח / תדר (V/F Curve), En=Voltage / frequency curve}" Style="{StaticResource H2}"/>
+                                <v:HelpTip x:Name="CurveHelp"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </DockPanel>
+
+                    <Border x:Name="PresetPanel" Background="{StaticResource CardHi}" CornerRadius="12" Padding="14,12" Margin="0,14,0,0">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <TextBlock Text="Undervolt" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center"/>
+                                <v:HelpTip Help="{v:T He='Undervolt: אותם תדרים בדיוק, במתח נמוך יותר. כל תדר בעקומה עובר למתח נמוך יותר בכמות שבחרת, ולכן בגרף הקו זז שמאלה (פחות mV) ולא למעלה. בכרטיסי NVIDIA זה נשמר כתדר לכל נקודת מתח, ולכן אותה נקודת מתח מקבלת את התדר שבמקור היה במתח גבוה יותר — בדיוק כמו Undervolt ב-Afterburner. היציבות תלויה בכמה mV הורדת: אם יש קריסה, בחר פחות mV. ההגדרות מתאפסות באתחול (אלא אם הפעלת החל בכל הפעלה).', En='Undervolt: exactly the same clocks at a lower voltage. Every clock on the curve moves to a lower voltage by the amount you pick, so on the graph the line moves left (fewer mV), not up. NVIDIA cards store this as a clock per voltage point, so a voltage point gets the clock that stock had at a higher voltage — exactly like an Afterburner undervolt. Stability depends on how many mV you remove: if it crashes, pick fewer mV. Settings reset on reboot (unless re-apply at start is on).'}"/>
+                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <TextBlock Text="{v:T He=להוריד מתח ב-, En=Lower voltage by}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                <WrapPanel Grid.Column="1">
+                                <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvmv" Tag="0" Content="0" Checked="UvAmount_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvmv" Tag="12.5" Content="−12.5" Checked="UvAmount_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvmv" Tag="25" Content="−25" IsChecked="True" Checked="UvAmount_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvmv" Tag="37.5" Content="−37.5" Checked="UvAmount_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvmv" Tag="50" Content="−50" Checked="UvAmount_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvmv" Tag="75" Content="−75" Checked="UvAmount_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvmv" Tag="100" Content="−100 mV" Checked="UvAmount_Checked"/>
+                                    </StackPanel>
+                                </Border>
+                                    <TextBlock x:Name="UvValue" Style="{StaticResource Num}" FontSize="14" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                </WrapPanel>
+
+                                <TextBlock Grid.Row="1" Text="{v:T He=איפה, En=Where}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,8,12,0"/>
+                                <WrapPanel Grid.Row="1" Grid.Column="1" Margin="0,8,0,0">
+                                <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <RadioButton x:Name="RangeAll" Style="{StaticResource Chip}" GroupName="uvrange" Content="{v:T He=כל העקומה, En=Whole curve}" IsChecked="True" Checked="UvRange_Checked"/>
+                                        <RadioButton x:Name="RangeSel" Style="{StaticResource Chip}" GroupName="uvrange" Content="{v:T He=טווח מסומן, En=Marked range}" Checked="UvRange_Checked"/>
+                                    </StackPanel>
+                                </Border>
+                                    <TextBlock x:Name="RangeText" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </WrapPanel>
+
+                                <TextBlock Grid.Row="2" Text="{v:T He=תקרת מתח (רשות), En=Voltage ceiling (optional)}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,8,12,0"/>
+                                <WrapPanel Grid.Row="2" Grid.Column="1" Margin="0,8,0,0">
+                                <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvcap" Tag="0" Content="{v:T He=ללא, En=None}" IsChecked="True" Checked="UvCap_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvcap" Tag="1050" Content="1050" Checked="UvCap_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvcap" Tag="1000" Content="1000" Checked="UvCap_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvcap" Tag="950" Content="950" Checked="UvCap_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvcap" Tag="900" Content="900" Checked="UvCap_Checked"/>
+                                        <RadioButton Style="{StaticResource Chip}" GroupName="uvcap" Tag="850" Content="850 mV" Checked="UvCap_Checked"/>
+                                    </StackPanel>
+                                </Border>
+                                    <v:HelpTip Help="{v:T He='תקרה = הכרטיס לא יעלה מעל המתח הזה בכלל, ולכן גם לא מעל התדר שיש בו. זה מה שחוסך הספק וחום בעומס כבד, במחיר תדר שיא מעט נמוך יותר. בלי תקרה, כשהכרטיס מוגבל בהספק (Limited by: Power) הוא ינצל את המתח הנמוך כדי לרוץ מעט מהר יותר באותו הספק במקום לחסוך.', En='Ceiling: the card never goes above this voltage, so not above the clock at it either. This is what saves power and heat under heavy load, at the cost of a slightly lower peak clock. Without a ceiling, when the card is power-limited (Limited by: Power) it uses the lower voltage to run a little faster at the same power instead of saving.'}"/>
+                                </WrapPanel>
+                            </Grid>
+                            <WrapPanel Margin="0,12,0,0">
+                                <Button Content="{v:T He=טען לעקומה, En=Load into the curve}" Style="{StaticResource Primary}" Click="LoadPreset_Click" Padding="16,6" Margin="0,0,8,0"/>
+                                <Button Content="{v:T He=חזרה למקור (Stock), En=Back to stock}" Click="LoadStock_Click" Padding="14,6"/>
+                            </WrapPanel>
+                            <TextBlock x:Name="PresetDesc" TextWrapping="Wrap" Margin="2,10,0,0" FontSize="12.5"/>
+                        </StackPanel>
+                    </Border>
+
+
+
+                    <UniformGrid Columns="3" Margin="-5,14,-5,0">
+                        <Border Style="{StaticResource SubCard}" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="{v:T He=תדר מקסימלי, En=Highest clock}" Style="{StaticResource Caption}"/>
+                                <TextBlock x:Name="SumClock" Style="{StaticResource TileVal}"/>
+                                <TextBlock x:Name="SumClockSub" Style="{StaticResource Caption}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource SubCard}" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="{v:T He=מתח מקסימלי, En=Highest voltage}" Style="{StaticResource Caption}"/>
+                                <TextBlock x:Name="SumVolt" Style="{StaticResource TileVal}"/>
+                                <TextBlock x:Name="SumVoltSub" Style="{StaticResource Caption}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource SubCard}" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="{v:T He=מתח לאותו תדר, En=Voltage for the same clock}" Style="{StaticResource Caption}"/>
+                                <TextBlock x:Name="SumSave" Style="{StaticResource TileVal}"/>
+                                <TextBlock x:Name="SumSaveSub" Style="{StaticResource Caption}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <DockPanel Margin="0,12,0,0">
+                        <Border DockPanel.Dock="Left" Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="ViewVolt" Style="{StaticResource Chip}" GroupName="vfview" Content="{v:T He=מתח לכל תדר, En=Voltage per clock}" IsChecked="True" Checked="CurveView_Checked"/>
+                                <RadioButton x:Name="ViewAb" Style="{StaticResource Chip}" GroupName="vfview" Content="{v:T He=תצוגת Afterburner, En=Afterburner view}" Checked="CurveView_Checked"/>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock x:Name="CurveLegend" Style="{StaticResource Caption}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="14,0,0,0"/>
+                    </DockPanel>
+                    <c:VfCurveEditor x:Name="Curve" Height="380" Margin="0,8,0,0"/>
+                    <StackPanel x:Name="ManualTools" Visibility="Collapsed">
+                    <TextBlock Text="{v:T He=כלים ידניים (תצוגת Afterburner), En=Manual tools (Afterburner view)}" Style="{StaticResource Caption}" Margin="2,12,0,0"/>
+                    <WrapPanel x:Name="CurveTools" Margin="0,6,0,0">
+                        <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="10,6" Margin="0,0,10,8">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{v:T He=מותאם אישית:, En=Custom:}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBox x:Name="UvFreq" Width="70" FlowDirection="LeftToRight" TextAlignment="Center" Text="1905"/>
+                                <TextBlock Text="{v:T He=MHz ב-, En=MHz at}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="6,0"/>
+                                <ComboBox x:Name="UvVolt" Width="96"/>
+                                <TextBlock Text="mV" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="6,0,10,0"/>
+                                <Button Content="{v:T He=בנה עקומה, En=Build curve}" Click="Undervolt_Click" Padding="12,5"/>
+                            </StackPanel>
+                        </Border>
+                        <Button Content="{v:T He=יישר מעל הנקודה הנבחרת, En=Flatten above selected point}" Click="Flatten_Click" Margin="0,0,8,8" Padding="12,6"/>
+                        <Button Content="−15 MHz" Click="ShiftDown_Click" Margin="0,0,6,8" Padding="12,6"/>
+                        <Button Content="+15 MHz" Click="ShiftUp_Click" Margin="0,0,8,8" Padding="12,6"/>
+                        <Button Content="{v:T He=אפס עקומה, En=Reset curve}" Click="ResetCurve_Click" Margin="0,0,8,8" Padding="12,6"/>
+                    </WrapPanel>
+                    </StackPanel>
+                    <TextBlock x:Name="CurveNote" Style="{StaticResource Hint}" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Row="1" VerticalAlignment="Top" Margin="0,16,0,0">
+                <!-- ───── Tuning ───── -->
+                <Border Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <DockPanel>
+                            <Border x:Name="DirtyPill" DockPanel.Dock="Right" Style="{StaticResource Pill}" Background="{StaticResource WarnSoft}" VerticalAlignment="Center" Visibility="Collapsed">
+                                <TextBlock Text="{v:T He=שינויים שלא הוחלו, En=Unapplied changes}" Foreground="{StaticResource Warn}" FontSize="12"/>
+                            </Border>
+                            <StackPanel>
+                                <TextBlock x:Name="GpuTitle" Style="{StaticResource H2}" FontSize="17"/>
+                                <TextBlock x:Name="GpuSub" Style="{StaticResource Caption}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+
+                        <Border x:Name="BlockedBox" Visibility="Collapsed" Background="{StaticResource WarnSoft}" CornerRadius="8" Padding="12,8" Margin="0,12,0,0">
+                            <TextBlock TextWrapping="Wrap" Foreground="#FDE68A" FontSize="12.5" Text="{v:T He=MSI Afterburner פתוח — הוא מחיל מחדש את ההגדרות שלו ודורס כל שינוי. סגור אותו (הכפתור בפס העליון) כדי לכוונן מכאן., En=MSI Afterburner is open — it re-applies its own settings and overrides any change. Close it (button in the top bar) to tune from here.}"/>
+                        </Border>
+
+                        <Grid Margin="0,20,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{v:T He=מגבלת הספק · Power Limit, En=Power limit}" FontWeight="SemiBold"/>
+                                    <v:HelpTip x:Name="PlHint"/>
+                                </StackPanel>
+                                <TextBlock x:Name="PlPct" Style="{StaticResource Caption}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBox x:Name="PlBox" Style="{StaticResource ValBox}" KeyDown="ValBox_KeyDown" LostFocus="ValBox_LostFocus" Tag="pl"/>
+                                <TextBlock Text="W" Style="{StaticResource Unit}"/>
+                            </StackPanel>
+                        </Grid>
+                        <Slider x:Name="PlSlider" Margin="0,8,0,0" SmallChange="1" LargeChange="10" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Slider_ValueChanged"/>
+
+                        <Grid Margin="0,18,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{v:T He=יעד טמפרטורה · Temp Limit, En=Temperature limit}" FontWeight="SemiBold"/>
+                                    <v:HelpTip x:Name="TempHelp"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBox x:Name="TlBox" Style="{StaticResource ValBox}" KeyDown="ValBox_KeyDown" LostFocus="ValBox_LostFocus" Tag="tl"/>
+                                <TextBlock Text="°C" Style="{StaticResource Unit}"/>
+                            </StackPanel>
+                        </Grid>
+                        <Slider x:Name="TlSlider" Margin="0,8,0,0" SmallChange="1" LargeChange="2" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Slider_ValueChanged"/>
+
+                        <Grid Margin="0,18,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{v:T He=תדר ליבה · Core Clock, En=Core clock}" FontWeight="SemiBold"/>
+                                    <v:HelpTip Help="{v:T He=מזיז את כל עקומת הבוסט. אותן יחידות כמו ב-Afterburner. התחל ב-+50 ועלה בצעדים של 15–25. אם אתה משתמש בעקומת V/F למטה השאר כאן 0., En=Shifts the whole boost curve. Same units as Afterburner. Start at +50 and step up by 15–25. If you use the V/F curve below keep this at 0.}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBox x:Name="CoreBox" Style="{StaticResource ValBox}" KeyDown="ValBox_KeyDown" LostFocus="ValBox_LostFocus" Tag="core"/>
+                                <TextBlock Text="MHz" Style="{StaticResource Unit}"/>
+                            </StackPanel>
+                        </Grid>
+                        <Slider x:Name="CoreSlider" Margin="0,8,0,0" SmallChange="5" LargeChange="15" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="Slider_ValueChanged"/>
+
+                        <Grid Margin="0,18,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{v:T He=תדר זיכרון · Memory Clock, En=Memory clock}" FontWeight="SemiBold"/>
+                                    <v:HelpTip Help="{v:T He='אותן יחידות כמו ב-Afterburner (+500 כאן זה +500 שם). ב-GDDR6X זיכרון לא יציב מוריד ביצועים לפני שהוא קורס — מדוד FPS.', En='Same units as Afterburner (+500 here is +500 there). Unstable GDDR6X loses performance before it crashes — measure FPS.'}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBox x:Name="MemBox" Style="{StaticResource ValBox}" KeyDown="ValBox_KeyDown" LostFocus="ValBox_LostFocus" Tag="mem"/>
+                                <TextBlock Text="MHz" Style="{StaticResource Unit}"/>
+                            </StackPanel>
+                        </Grid>
+                        <Slider x:Name="MemSlider" Margin="0,8,0,0" SmallChange="10" LargeChange="50" TickFrequency="10" IsSnapToTickEnabled="True" ValueChanged="Slider_ValueChanged"/>
+                        <CheckBox x:Name="WideRange" Content="{v:T He=טווח מורחב (לכוונון מתקדם בלבד), En=Extended range (advanced tuning only)}" Margin="0,10,0,0" FontSize="12" Foreground="{StaticResource Muted}" Checked="WideRange_Changed" Unchecked="WideRange_Changed"/>
+
+                        <WrapPanel Margin="0,20,0,0">
+                            <Button x:Name="ApplyBtn" Style="{StaticResource Primary}" Click="Apply_Click" Padding="22,8" Margin="0,0,8,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE73E;" FontFamily="{StaticResource IconFont}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{v:T He=החל, En=Apply}"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Content="{v:T He=ביטול שינויים, En=Discard changes}" Click="Revert_Click" Margin="0,0,8,0"/>
+                            <Button Content="{v:T He=איפוס לברירת מחדל, En=Reset to defaults}" Style="{StaticResource Danger}" Click="Reset_Click"/>
+                        </WrapPanel>
+                        <TextBlock x:Name="HwState" Style="{StaticResource Hint}" Margin="0,10,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- ───── OC profiles ───── -->
+                <Border Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="{v:T He=פרופילי OC, En=OC profiles}" Style="{StaticResource H2}"/>
+                            <v:HelpTip Help="{v:T He=לחיצה על פרופיל מחילה אותו מיד (כולל העקומה). שמור שומר את הערכים הנוכחיים לחריץ שנבחר., En=Clicking a profile applies it immediately (curve included). Save stores the current values in the chosen slot.}"/>
+                        </StackPanel>
+                        <UniformGrid x:Name="Slots" Columns="5" Margin="-4,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <TextBlock Text="{v:T He=שמור לחריץ, En=Save to slot}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ComboBox x:Name="SaveSlotCombo" Width="70"/>
+                            <Button Content="{v:T He=שמור, En=Save}" Margin="8,0,0,0" Click="SaveSlot_Click" Padding="14,5"/>
+                        </StackPanel>
+                        <CheckBox x:Name="ApplyOnStart" Style="{StaticResource Switch}" Content="{v:T He=החל את ההגדרות האחרונות בכל הפעלה, En=Re-apply the last settings at every start}" Margin="0,14,0,0" Checked="ApplyOnStart_Changed" Unchecked="ApplyOnStart_Changed"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- ───── Monitoring ───── -->
+            <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource CardBorder}" VerticalAlignment="Top" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="{v:T He=ניטור חי, En=Live monitoring}" Style="{StaticResource H2}" Margin="0,0,0,12"/>
+                    <UniformGrid Columns="3" Margin="-5,0">
+                        <Border Style="{StaticResource SubCard}" Margin="5"><StackPanel><TextBlock Text="{v:T He=תדר ליבה, En=Core clock}" Style="{StaticResource Caption}"/><TextBlock x:Name="MClock" Style="{StaticResource TileVal}"/></StackPanel></Border>
+                        <Border Style="{StaticResource SubCard}" Margin="5"><StackPanel><TextBlock Text="{v:T He=תדר זיכרון, En=Memory clock}" Style="{StaticResource Caption}"/><TextBlock x:Name="MMem" Style="{StaticResource TileVal}"/></StackPanel></Border>
+                        <Border Style="{StaticResource SubCard}" Margin="5"><StackPanel><TextBlock Text="{v:T He=מתח ליבה, En=Core voltage}" Style="{StaticResource Caption}"/><TextBlock x:Name="MVolt" Style="{StaticResource TileVal}"/></StackPanel></Border>
+                        <Border Style="{StaticResource SubCard}" Margin="5"><StackPanel><TextBlock Text="{v:T He=GPU · ליבה, En=GPU · core}" Style="{StaticResource Caption}"/><TextBlock x:Name="MTemp" Style="{StaticResource TileVal}"/></StackPanel></Border>
+                        <Border Style="{StaticResource SubCard}" Margin="5" ToolTip="{v:T He=הנקודה החמה ביותר על שבב כרטיס המסך. בדרך כלל 10–15 מעלות מעל הליבה, En=The hottest point on the graphics chip. Usually 10–15 °C above the core}"><StackPanel><TextBlock Text="GPU · Hot Spot" Style="{StaticResource Caption}"/><TextBlock x:Name="MHot" Style="{StaticResource TileVal}"/></StackPanel></Border>
+                        <Border Style="{StaticResource SubCard}" Margin="5" ToolTip="{v:T He=טמפרטורת שבבי הזיכרון GDDR6X של הכרטיס, En=Temperature of the GDDR6X memory chips on the card}"><StackPanel><TextBlock Text="GPU · VRAM" Style="{StaticResource Caption}"/><TextBlock x:Name="MMemT" Style="{StaticResource TileVal}"/></StackPanel></Border>
+                        <Border Style="{StaticResource SubCard}" Margin="5"><StackPanel><TextBlock Text="{v:T He=הספק, En=Power}" Style="{StaticResource Caption}"/><TextBlock x:Name="MPower" Style="{StaticResource TileVal}"/></StackPanel></Border>
+                        <Border Style="{StaticResource SubCard}" Margin="5"><StackPanel><TextBlock Text="{v:T He=עומס, En=Load}" Style="{StaticResource Caption}"/><TextBlock x:Name="MLoad" Style="{StaticResource TileVal}"/></StackPanel></Border>
+                        <Border Style="{StaticResource SubCard}" Margin="5"><StackPanel><TextBlock Text="{v:T He=מאווררים, En=Fans}" Style="{StaticResource Caption}"/><TextBlock x:Name="MFan" Style="{StaticResource TileVal}"/></StackPanel></Border>
+                    </UniformGrid>
+                    <Border Style="{StaticResource SubCard}" Margin="0,10,0,0">
+                        <DockPanel>
+                            <TextBlock x:Name="MPState" Style="{StaticResource Num}" FontSize="13" DockPanel.Dock="Right" Margin="12,0,0,0"/>
+                            <TextBlock Text="{v:T He=מה מגביל עכשיו:, En=Limited by:}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock x:Name="MReason" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SubCard}" Margin="0,10,0,0">
+                        <DockPanel>
+                            <TextBlock x:Name="MVram" Style="{StaticResource Num}" FontSize="13" DockPanel.Dock="Right"/>
+                            <TextBlock Text="{v:T He=VRAM בשימוש, En=VRAM used}" Style="{StaticResource Caption}" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Border>
+                    <TextBlock Text="{v:T He=תדרים · 5 דקות, En=Clocks · 5 minutes}" Style="{StaticResource Caption}" Margin="0,16,0,4"/>
+                    <c:TimeChart x:Name="ClockChart" Height="120" SpanSeconds="300" MinSpan="300" YMin="0"/>
+                    <WrapPanel x:Name="ClockLegend" Margin="0,6,0,0"/>
+                    <TextBlock Text="{v:T He=טמפרטורות · 5 דקות, En=Temperatures · 5 minutes}" Style="{StaticResource Caption}" Margin="0,12,0,4"/>
+                    <c:TimeChart x:Name="TempChart" Height="120" SpanSeconds="300" MinSpan="20"/>
+                    <WrapPanel x:Name="TempLegend" Margin="0,6,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ───── GPU fans ───── -->
+            <Border Grid.Row="2" Grid.ColumnSpan="3" Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                <StackPanel>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="{v:T He=עריכת עקומה מלאה, En=Full curve editor}" Style="{StaticResource Ghost}" Padding="10,4" Click="EditFanCurve_Click"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{v:T He=מאווררי כרטיס המסך, En=Graphics card fans}" Style="{StaticResource H2}" VerticalAlignment="Center"/>
+                            <v:HelpTip Help="{v:T He='אוטומטי: עקומת היצרן שצרובה בכרטיס (VBIOS) כולל עצירה בסרק. Zero RPM כמו ב-Afterburner: הכרטיס לא מקבל פחות מ-30% ידני — לכן כל ערך מתחת ל-30% בעקומה מחזיר את המאווררים לכרטיס והוא עוצר אותם.', En='Auto: the curve the maker stored in the card (VBIOS) including idle stop. Zero RPM like Afterburner: the card accepts no less than 30% manual duty — so any curve value below 30% hands the fans back to the card and it stops them.'}"/>
+                        </StackPanel>
+                    </DockPanel>
+                    <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" Margin="0,12,0,0" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="FanAuto" Style="{StaticResource Chip}" GroupName="gfan" Content="{v:T He=אוטומטי (דרייבר), En=Auto (driver)}" Tag="Auto" Checked="FanMode_Checked"/>
+                            <RadioButton x:Name="FanFixed" Style="{StaticResource Chip}" GroupName="gfan" Content="{v:T He=קבוע, En=Fixed}" Tag="Fixed" Checked="FanMode_Checked"/>
+                            <RadioButton x:Name="FanCurve" Style="{StaticResource Chip}" GroupName="gfan" Content="{v:T He=עקומה, En=Curve}" Tag="Curve" Checked="FanMode_Checked"/>
+                        </StackPanel>
+                    </Border>
+                    <DockPanel x:Name="FanFixedPanel" Margin="0,12,0,0">
+                        <TextBlock x:Name="FanFixedVal" Style="{StaticResource Num}" FontSize="17" DockPanel.Dock="Right" Width="60" TextAlignment="Right"/>
+                        <Slider x:Name="FanSlider" Minimum="30" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="FanSlider_ValueChanged"/>
+                    </DockPanel>
+                    <StackPanel x:Name="FanCurvePanel" Margin="0,12,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{v:T He=עקומה:, En=Curve:}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <ComboBox x:Name="FanCurveCombo" Width="220" SelectionChanged="FanCurveCombo_SelectionChanged"/>
+                            <CheckBox x:Name="FanVramBox" Content="{v:T He=להגיב גם לטמפרטורת ה-VRAM, En=Also react to VRAM temperature}" Margin="14,0,0,0" VerticalAlignment="Center" FontSize="12"
+                                      Checked="FanVram_Changed" Unchecked="FanVram_Changed"
+                                      ToolTip="{v:T He=העקומה תעקוב אחרי החם מבין ליבת ה-GPU וזיכרון ה-GDDR6X. שים לב: הזיכרון חם יותר מהליבה ב-10–20 מעלות, En=The curve follows the hotter of GPU core and GDDR6X memory. Note: memory runs 10–20 °C hotter than the core}"/>
+                        </StackPanel>
+                        <c:FanCurveEditor x:Name="FanEditor" Height="240" Margin="0,10,0,0"/>
+                    </StackPanel>
+                    <TextBlock x:Name="FanInfo" Style="{StaticResource Hint}" Margin="0,8,0,0"/>
+                    <UniformGrid x:Name="FanRpmTiles" Rows="1" Margin="-5,10,-5,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,114 @@
+<UserControl x:Class="PulseWatch.Views.SystemView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:PulseWatch.Views">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,6,24,24">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel>
+                <Border Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="{v:T He=המחשב שלי, En=My computer}" Style="{StaticResource H2}" Margin="0,0,0,8"/>
+                        <StackPanel x:Name="Specs"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="{v:T He=כוננים ובריאות, En=Drives and health}" Style="{StaticResource H2}" Margin="0,0,0,8"/>
+                        <StackPanel x:Name="Drives"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2">
+                <Border Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="{v:T He=הגדרות, En=Settings}" Style="{StaticResource H2}" Margin="0,0,0,6"/>
+
+                        <DockPanel Margin="0,8,0,8">
+                            <TextBlock Text="{v:T He=שפה · Language, En=Language · שפה}" VerticalAlignment="Center"/>
+                            <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="LangHe" Style="{StaticResource Chip}" GroupName="lang" Content="עברית" Tag="he" Checked="Lang_Checked"/>
+                                    <RadioButton x:Name="LangEn" Style="{StaticResource Chip}" GroupName="lang" Content="English" Tag="en" Checked="Lang_Checked"/>
+                                </StackPanel>
+                            </Border>
+                        </DockPanel>
+
+                        <CheckBox x:Name="StartWithWindows" Style="{StaticResource Switch}" Margin="0,8" Content="{v:T He=הפעל עם Windows (במגש · בלי חלון UAC), En=Start with Windows (in the tray · no UAC prompt)}" Checked="Startup_Changed" Unchecked="Startup_Changed"/>
+                        <CheckBox x:Name="StartMin" Style="{StaticResource Switch}" Margin="0,8" Content="{v:T He=התחל ממוזער למגש, En=Start minimized to the tray}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                        <CheckBox x:Name="CloseToTray" Style="{StaticResource Switch}" Margin="0,8" Content="{v:T He=סגירת החלון ממשיכה לפעול ברקע (מומלץ — אחרת העקומות מפסיקות), En=Closing the window keeps running in the background (recommended — otherwise curves stop)}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+
+                        <DockPanel Margin="0,14,0,0">
+                            <TextBlock Text="{v:T He=קצב דגימה, En=Sampling rate}" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="PollCombo" Width="160" HorizontalAlignment="Right" SelectionChanged="Setting_Changed">
+                                <ComboBoxItem Content="{v:T He=כל חצי שנייה, En=Every 0.5 s}" Tag="500"/>
+                                <ComboBoxItem Content="{v:T He=כל שנייה (מומלץ), En=Every second (recommended)}" Tag="1000"/>
+                                <ComboBoxItem Content="{v:T He=כל 2 שניות, En=Every 2 s}" Tag="2000"/>
+                            </ComboBox>
+                        </DockPanel>
+                        <DockPanel Margin="0,14,0,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="{v:T He=קריאת דיסקים קשיחים (HDD), En=Hard disk (HDD) reads}"/><v:HelpTip Help="{v:T He=טמפרטורת דיסק קשיח משתנה לאט (דקות) וקריאת SMART שלו איטית. כונני NVMe נקראים כל כמה שניות כי הם זולים לקריאה ומשפיעים על מאוורר ה-M.2. בדף חיישנים/מערכת הקריאה מואצת לחצי דקה., En=Hard-disk temperature changes slowly (minutes) and its SMART read is slow. NVMe drives are read every few seconds because they are cheap and drive the M.2 fan. On the Sensors/System pages reads speed up to every 30 s.}"/></StackPanel>
+                            <ComboBox x:Name="HddCombo" Width="200" HorizontalAlignment="Right" SelectionChanged="Setting_Changed">
+                                <ComboBoxItem Content="{v:T He=כל דקה, En=Every minute}" Tag="60"/>
+                                <ComboBoxItem Content="{v:T He=כל 5 דקות (מומלץ), En=Every 5 minutes (recommended)}" Tag="300"/>
+                                <ComboBoxItem Content="{v:T He=כל 15 דקות, En=Every 15 minutes}" Tag="900"/>
+                                <ComboBoxItem Content="{v:T He=כל שעה, En=Every hour}" Tag="3600"/>
+                            </ComboBox>
+                        </DockPanel>
+                        <DockPanel Margin="0,14,0,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="{v:T He=קריאת כונני NVMe, En=NVMe drive reads}"/><v:HelpTip Help="{v:T He='כמה פעמים לקרוא טמפרטורה ובריאות של כונני NVMe כשהחלון פתוח (במגש לפחות כל 10 שניות). קריאה כזו לא כותבת לכונן ולא גורמת לבלאי. מאוורר ה-M.2 עובד לפי הטמפרטורה הזו, לכן קצב איטי יותר גם מגיב לאט יותר.', En='How often NVMe temperature and health are read while the window is open (in the tray at least every 10 s). Such a read writes nothing and causes no wear. The M.2 fan follows this temperature, so a slower rate also reacts more slowly.'}"/></StackPanel>
+                            <ComboBox x:Name="NvmeCombo" Width="200" HorizontalAlignment="Right" SelectionChanged="Setting_Changed">
+                                <ComboBoxItem Content="{v:T He=כל 2 שניות, En=Every 2 seconds}" Tag="2"/>
+                                <ComboBoxItem Content="{v:T He=כל 5 שניות (מומלץ), En=Every 5 seconds (recommended)}" Tag="5"/>
+                                <ComboBoxItem Content="{v:T He=כל 10 שניות, En=Every 10 seconds}" Tag="10"/>
+                                <ComboBoxItem Content="{v:T He=כל 30 שניות, En=Every 30 seconds}" Tag="30"/>
+                                <ComboBoxItem Content="{v:T He=כל דקה, En=Every minute}" Tag="60"/>
+                            </ComboBox>
+                        </DockPanel>
+                        <CheckBox x:Name="HddSleep" Style="{StaticResource Switch}" Margin="0,10,0,0" Content="{v:T He=לא להעיר דיסק שנכנס לשינה, En=Never wake a sleeping disk}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+
+                        <DockPanel Margin="0,14,0,0">
+                            <TextBlock Text="{v:T He=תוכנית צריכת חשמל, En=Power plan}" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="PowerCombo" Width="220" HorizontalAlignment="Right" SelectionChanged="Power_Changed"/>
+                        </DockPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,22,0,6"><TextBlock Text="{v:T He=הגנה תרמית, En=Thermal protection}" FontWeight="SemiBold"/><v:HelpTip Help="{v:T He='רשת ביטחון למה שלא מגיב לחום, בגבול של החומרה עצמה (ברירת המחדל: הטמפרטורה המקסימלית של המעבד ושל כרטיס המסך). מאוורר שעל עקומה ממשיך לפי העקומה שלו — היא כבר שומרת עליו. מעבד בגבול: מאווררי רדיאטור שעל מהירות קבועה עולים ל-100%. כרטיס מסך בגבול: המאווררים שלו (אם הם על מהירות קבועה או אוטומטי) ומאווררי המערכת שעוקבים אחריו או על מהירות קבועה עולים ל-100% — הם מוציאים את האוויר החם מהמארז. המשאבה תמיד נשארת כפי שהגדרת. חוזר לרגיל כשהטמפרטורה יורדת 6 מעלות.', En='A safety net for what does not react to heat, at the hardware limit itself (default: the maximum temperature of the CPU and of the graphics card). A fan on a curve keeps following its curve — that already protects it. CPU at its limit: radiator fans on a fixed speed go to 100%. Graphics card at its limit: its fans (if on a fixed speed or auto) and the system fans that follow it or run at a fixed speed go to 100% — they move the hot air out of the case. The pump always stays as you set it. Back to normal when the temperature drops 6 °C.'}"/></StackPanel>
+                        <DockPanel Margin="0,4"><TextBlock Text="{v:T He=סף CPU, En=CPU threshold}" Style="{StaticResource Caption}"/><TextBlock x:Name="SafeCpuVal" Style="{StaticResource Num}" FontSize="13" HorizontalAlignment="Right"/></DockPanel>
+                        <Slider x:Name="SafeCpu" Minimum="75" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Setting_Changed"/>
+                        <DockPanel Margin="0,4"><TextBlock Text="{v:T He=סף GPU (ליבה), En=GPU threshold (core)}" Style="{StaticResource Caption}"/><TextBlock x:Name="SafeGpuVal" Style="{StaticResource Num}" FontSize="13" HorizontalAlignment="Right"/></DockPanel>
+                        <Slider x:Name="SafeGpu" Minimum="70" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Setting_Changed"/>
+                        <DockPanel Margin="0,4"><StackPanel Orientation="Horizontal"><TextBlock Text="{v:T He=מאווררי Lian Li כש-PulseWatch נסגר, En=Lian Li fans when PulseWatch exits}" Style="{StaticResource Caption}"/><v:HelpTip Help="{v:T He=ל-AIO אין מצב אוטומטי משלו — ביציאה המשאבה עוברת ל-100% והמאווררים לערך הזה. מאווררי לוח האם והכרטיס חוזרים ל-BIOS/דרייבר., En=The AIO has no automatic mode of its own — on exit the pump goes to 100% and its fans to this value. Motherboard and GPU fans return to BIOS/driver control.}"/></StackPanel><TextBlock x:Name="ExitFanVal" Style="{StaticResource Num}" FontSize="13" HorizontalAlignment="Right"/></DockPanel>
+                        <Slider x:Name="ExitFan" Minimum="30" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="Setting_Changed"/>
+
+                        <WrapPanel Margin="0,18,0,0">
+                            <Button Content="{v:T He=פתח תיקיית הגדרות, En=Open settings folder}" Click="OpenData_Click" Margin="0,0,8,0"/>
+                            <Button Content="{v:T He=פתח לוג, En=Open log}" Click="OpenLog_Click" Margin="0,0,8,0"/>
+                            <Button Content="{v:T He=יציאה מ-PulseWatch, En=Exit PulseWatch}" Style="{StaticResource Danger}" Click="Exit_Click"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="{v:T He=תוכנות יצרן, En=Vendor apps}" Style="{StaticResource H2}"/><v:HelpTip Help="{v:T He=שתי תוכנות שמנסות לשלוט באותו מאוורר נלחמות — המאוורר קופץ בין ערכים. כשתוכנה כזו פתוחה PulseWatch עובר אוטומטית לקריאה בלבד עבור החומרה שלה., En=Two apps controlling the same fan fight — the fan jumps between values. While such an app is open PulseWatch automatically switches to read-only for its hardware.}"/></StackPanel>
+                        <StackPanel x:Name="ConflictsHost"/>
+                        <CheckBox x:Name="AutoClose" Style="{StaticResource Switch}" Margin="0,14,0,0" Content="{v:T He=סגור אותן אוטומטית בכל הפעלה של PulseWatch, En=Close them automatically whenever PulseWatch starts}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="{v:T He=אודות, En=About}" Style="{StaticResource H2}"/>
+                        <TextBlock x:Name="About" Style="{StaticResource Hint}" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

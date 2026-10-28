@@ -1,0 +1,145 @@
+<UserControl x:Class="PulseWatch.Views.AutomationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:PulseWatch.Views">
+    <UserControl.Resources>
+        <Style x:Key="RowVal" TargetType="TextBlock" BasedOn="{StaticResource Num}">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,6,24,24">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel>
+                <!-- ───── Game profiles ───── -->
+                <Border Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{v:T He=פרופיל לכל משחק, En=Per-game profiles}" Style="{StaticResource H2}"/>
+                            <v:HelpTip Help="{v:T He='כשהתוכנה שבחרת רצה PulseWatch עובר לפרופיל הקירור ו/או לפרופיל ה-OC שקבעת לה, וכשהיא נסגרת הכל חוזר למה שהיה לפני. הבדיקה מתבצעת כל 5 שניות. פרופילי OC נשמרים בדף כרטיס המסך (חריצים 1–5).', En='While the program you pick is running PulseWatch switches to the cooling profile and/or the OC profile you set for it, and when it closes everything goes back to how it was. Checked every 5 seconds. OC profiles are saved on the graphics card page (slots 1–5).'}"/>
+                        </StackPanel>
+                        <CheckBox x:Name="GamesOn" Style="{StaticResource Switch}" Margin="0,12,0,0" Content="{v:T He=החלף אוטומטית לפי התוכנה שרצה, En=Switch automatically by the running program}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                        <TextBlock x:Name="GameState" Style="{StaticResource Caption}" Margin="0,8,0,0"/>
+                        <StackPanel x:Name="RulesHost" Margin="0,10,0,0"/>
+                        <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="10,8" Margin="0,10,0,0">
+                            <StackPanel>
+                                <DockPanel>
+                                    <TextBox x:Name="NewExe" DockPanel.Dock="Right" Width="150" Margin="8,0,0,0" VerticalContentAlignment="Center" FlowDirection="LeftToRight" ToolTip="{v:T He=או הקלד שם קובץ בלי .exe (למשל cs2), En=Or type a file name without .exe (e.g. cs2)}"/>
+                                    <ComboBox x:Name="Running" SelectionChanged="Running_Changed"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,8,0,0">
+                                    <Button DockPanel.Dock="Right" Content="{v:T He=הוסף, En=Add}" Style="{StaticResource Primary}" Click="AddRule_Click" Padding="18,5" Margin="8,0,0,0"/>
+                                    <ComboBox x:Name="NewSlot" DockPanel.Dock="Right" Width="150" Margin="8,0,0,0"/>
+                                    <ComboBox x:Name="NewProfile"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- ───── Hotkeys ───── -->
+                <Border Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{v:T He=קיצורי מקלדת, En=Keyboard shortcuts}" Style="{StaticResource H2}"/>
+                            <v:HelpTip Help="{v:T He='עובדים מכל מקום, גם כשהחלון סגור ובתוך משחק. אם תוכנה אחרת כבר תפסה צירוף, הוא לא יעבוד כאן (רשום בלוג).', En='Work from anywhere, also with the window closed and inside a game. If another program already took a combination it will not work here (noted in the log).'}"/>
+                        </StackPanel>
+                        <CheckBox x:Name="HotkeysOn" Style="{StaticResource Switch}" Margin="0,12,0,8" Content="{v:T He=קיצורי מקלדת פעילים, En=Shortcuts enabled}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                        <StackPanel x:Name="KeysHost"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2">
+                <!-- ───── Alerts ───── -->
+                <Border Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{v:T He=התראות טמפרטורה, En=Temperature alerts}" Style="{StaticResource H2}"/>
+                            <v:HelpTip Help="{v:T He='הודעת Windows כשטמפרטורה עוברת את הסף. התראה אחת בכל פעם — הבאה רק אחרי שהטמפרטורה ירדה 5 מעלות מתחת לסף (ולכל היותר פעם ב-10 דקות לכל חיישן). זה בנוסף להגנה התרמית בהגדרות, שמעלה את המאווררים ל-100%.', En='A Windows notification when a temperature crosses its limit. One at a time — the next only after it dropped 5 °C below the limit (and at most once per 10 minutes per sensor). This is on top of the thermal protection in Settings, which raises the fans to 100%.'}"/>
+                        </StackPanel>
+                        <CheckBox x:Name="AlertsOn" Style="{StaticResource Switch}" Margin="0,12,0,4" Content="{v:T He=התראות פעילות, En=Alerts enabled}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                        <DockPanel Margin="0,8,0,0"><TextBlock Text="{v:T He=מעבד (Tctl), En=CPU (Tctl)}" Style="{StaticResource Caption}"/><TextBlock x:Name="ACpuVal" Style="{StaticResource RowVal}"/></DockPanel>
+                        <Slider x:Name="ACpu" Minimum="70" Maximum="95" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Setting_Changed"/>
+                        <DockPanel Margin="0,6,0,0"><TextBlock Text="{v:T He=ליבת כרטיס המסך, En=GPU core}" Style="{StaticResource Caption}"/><TextBlock x:Name="AGpuVal" Style="{StaticResource RowVal}"/></DockPanel>
+                        <Slider x:Name="AGpu" Minimum="65" Maximum="92" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Setting_Changed"/>
+                        <DockPanel Margin="0,6,0,0"><TextBlock Text="GPU Hot Spot" Style="{StaticResource Caption}"/><TextBlock x:Name="AHotVal" Style="{StaticResource RowVal}"/></DockPanel>
+                        <Slider x:Name="AHot" Minimum="80" Maximum="110" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Setting_Changed"/>
+                        <DockPanel Margin="0,6,0,0"><TextBlock Text="{v:T He=זיכרון כרטיס המסך (VRAM), En=GPU memory (VRAM)}" Style="{StaticResource Caption}"/><TextBlock x:Name="AVramVal" Style="{StaticResource RowVal}"/></DockPanel>
+                        <Slider x:Name="AVram" Minimum="80" Maximum="110" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Setting_Changed"/>
+                        <DockPanel Margin="0,6,0,0"><TextBlock Text="{v:T He=כונני NVMe (החם ביותר), En=NVMe drives (hottest)}" Style="{StaticResource Caption}"/><TextBlock x:Name="ANvmeVal" Style="{StaticResource RowVal}"/></DockPanel>
+                        <Slider x:Name="ANvme" Minimum="50" Maximum="85" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Setting_Changed"/>
+                        <Button Content="{v:T He=שלח התראת בדיקה, En=Send a test notification}" Click="TestAlert_Click" HorizontalAlignment="Left" Margin="0,12,0,0" Padding="14,5"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- ───── OSD ───── -->
+                <Border Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{v:T He=תצוגה על המסך (OSD), En=On-screen display (OSD)}" Style="{StaticResource H2}"/>
+                            <v:HelpTip Help="{v:T He='חלון קטן תמיד-עליון שהעכבר עובר דרכו, על המסך שבוחרים. מופיע מעל משחקים בחלון ובמסך מלא ללא גבולות (Borderless); במסך מלא בלעדי (Exclusive Fullscreen) Windows מסתיר אותו. FPS נמדד בלי לגעת במשחק — דרך מעקב האירועים של Windows (כמו PresentMon), עבור התוכנה שבחזית. עובד למשחקי DirectX 9–12; משחקי Vulkan ו-OpenGL לא נמדדים. Ctrl+Alt+O מציג ומסתיר.', En='A small always-on-top window the mouse passes through, on the screen you pick. Shows over windowed and borderless-fullscreen games; exclusive fullscreen hides it. FPS is measured without touching the game — through Windows event tracing (like PresentMon), for the program in the foreground. Works for DirectX 9–12 games; Vulkan and OpenGL games are not measured. Ctrl+Alt+O shows and hides it.'}"/>
+                        </StackPanel>
+                        <CheckBox x:Name="OsdOn" Style="{StaticResource Switch}" Margin="0,12,0,8" Content="{v:T He=הצג OSD, En=Show the OSD}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                        <DockPanel Margin="0,6,0,0">
+                            <TextBlock Text="{v:T He=מיקום למעלה, En=Position · top}" Style="{StaticResource Caption}" VerticalAlignment="Center"/>
+                            <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                    <RadioButton x:Name="CornerTl" Style="{StaticResource Chip}" GroupName="osdc" Tag="tl" Content="{v:T He=שמאל, En=Left}" Checked="Setting_Changed"/>
+                                    <RadioButton x:Name="CornerTc" Style="{StaticResource Chip}" GroupName="osdc" Tag="tc" Content="{v:T He=מרכז, En=Centre}" Checked="Setting_Changed"/>
+                                    <RadioButton x:Name="CornerTr" Style="{StaticResource Chip}" GroupName="osdc" Tag="tr" Content="{v:T He=ימין, En=Right}" Checked="Setting_Changed"/>
+                                </StackPanel>
+                            </Border>
+                        </DockPanel>
+                        <DockPanel Margin="0,6,0,0">
+                            <TextBlock Text="{v:T He=מיקום למטה, En=Position · bottom}" Style="{StaticResource Caption}" VerticalAlignment="Center"/>
+                            <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                    <RadioButton x:Name="CornerBl" Style="{StaticResource Chip}" GroupName="osdc" Tag="bl" Content="{v:T He=שמאל, En=Left}" Checked="Setting_Changed"/>
+                                    <RadioButton x:Name="CornerBc" Style="{StaticResource Chip}" GroupName="osdc" Tag="bc" Content="{v:T He=מרכז, En=Centre}" Checked="Setting_Changed"/>
+                                    <RadioButton x:Name="CornerBr" Style="{StaticResource Chip}" GroupName="osdc" Tag="br" Content="{v:T He=ימין, En=Right}" Checked="Setting_Changed"/>
+                                </StackPanel>
+                            </Border>
+                        </DockPanel>
+                        <DockPanel Margin="0,10,0,0">
+                            <TextBlock Text="{v:T He=מסך, En=Screen}" Style="{StaticResource Caption}" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="OsdScreen" Width="240" HorizontalAlignment="Right" SelectionChanged="Setting_Changed"/>
+                        </DockPanel>
+                        <DockPanel Margin="0,10,0,0">
+                            <TextBlock Text="{v:T He=צורה, En=Layout}" Style="{StaticResource Caption}" VerticalAlignment="Center"/>
+                            <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="LayoutRows" Style="{StaticResource Chip}" GroupName="osdl" Content="{v:T He=כמה שורות, En=Rows}" Checked="Setting_Changed"/>
+                                    <RadioButton x:Name="LayoutLine" Style="{StaticResource Chip}" GroupName="osdl" Content="{v:T He=שורה אחת לרוחב, En=One line}" Checked="Setting_Changed"/>
+                                </StackPanel>
+                            </Border>
+                        </DockPanel>
+                        <DockPanel Margin="0,10,0,0">
+                            <TextBlock Text="{v:T He=גודל, En=Size}" Style="{StaticResource Caption}" VerticalAlignment="Center"/>
+                            <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="SizeS" Style="{StaticResource Chip}" GroupName="osds" Content="{v:T He=קטן, En=Small}" Checked="Setting_Changed"/>
+                                    <RadioButton x:Name="SizeM" Style="{StaticResource Chip}" GroupName="osds" Content="{v:T He=רגיל, En=Normal}" Checked="Setting_Changed"/>
+                                    <RadioButton x:Name="SizeL" Style="{StaticResource Chip}" GroupName="osds" Content="{v:T He=גדול, En=Large}" Checked="Setting_Changed"/>
+                                </StackPanel>
+                            </Border>
+                        </DockPanel>
+                        <DockPanel Margin="0,12,0,0">
+                            <CheckBox x:Name="OsdFps" Content="FPS" FontWeight="SemiBold" VerticalAlignment="Center" Checked="Setting_Changed" Unchecked="Setting_Changed" ToolTip="{v:T He=DirectX 9–12. משחקי Vulkan ו-OpenGL לא נמדדים., En=DirectX 9–12. Vulkan and OpenGL games are not measured.}"/>
+                            <ComboBox x:Name="FpsSource" Width="260" HorizontalAlignment="Right" SelectionChanged="Setting_Changed"/>
+                        </DockPanel>
+                        <StackPanel x:Name="OsdItemsHost" Margin="0,8,0,0"/>
+                        <DockPanel Margin="0,6,0,0"><TextBlock Text="{v:T He=אטימות הרקע, En=Background opacity}" Style="{StaticResource Caption}"/><TextBlock x:Name="OsdOpacityVal" Style="{StaticResource RowVal}"/></DockPanel>
+                        <Slider x:Name="OsdOpacity" Minimum="0.2" Maximum="1" TickFrequency="0.05" IsSnapToTickEnabled="True" ValueChanged="Setting_Changed"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

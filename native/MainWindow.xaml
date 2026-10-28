@@ -1,0 +1,158 @@
+<Window x:Class="PulseWatch.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="clr-namespace:PulseWatch.Views"
+        Title="PulseWatch" Width="1480" Height="940" MinWidth="1000" MinHeight="600"
+        WindowStartupLocation="CenterScreen" FlowDirection="{l:Flow}"
+        Background="{StaticResource Bg}" Foreground="{StaticResource Text}"
+        FontFamily="{StaticResource UiFont}" FontSize="13"
+        WindowStyle="None" ResizeMode="CanResize" Icon="Assets/pulsewatch.ico"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Ideal">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="52" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Grid x:Name="Root">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="236"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ───────────── Sidebar ───────────── -->
+        <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="20,16,16,22">
+                    <Border Width="34" Height="34" CornerRadius="10">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#22D3EE" Offset="0"/>
+                                <GradientStop Color="#A78BFA" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <TextBlock Text="&#xE945;" FontFamily="{StaticResource IconFont}" FontSize="17" Foreground="#06202A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="PulseWatch" FontSize="16" FontWeight="SemiBold"/>
+                        <TextBlock Text="{l:T He=מרכז שליטה ובקרה, En=Control Center}" Style="{StaticResource Caption}" FontSize="11"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Border DockPanel.Dock="Bottom" Margin="14,10,14,16" Style="{StaticResource SubCard}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse x:Name="AdminDot" Width="8" Height="8" Fill="{StaticResource Good}" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="AdminText" Margin="8,0,0,0" FontSize="12"/>
+                        </StackPanel>
+                        <TextBlock x:Name="HubStatus" Style="{StaticResource Hint}" Margin="0,6,0,0" FontSize="11"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel x:Name="Nav">
+                    <RadioButton Style="{StaticResource NavItem}" Tag="&#xE80F;" Content="{l:T He=סקירה, En=Overview}" x:Name="NavDashboard" IsChecked="True" Checked="Nav_Checked"/>
+                    <RadioButton Style="{StaticResource NavItem}" Tag="&#xEC4A;" Content="{l:T He=קירור ומאווררים, En=Cooling and fans}" x:Name="NavCooling" Checked="Nav_Checked"/>
+                    <RadioButton Style="{StaticResource NavItem}" Tag="&#xE950;" Content="{l:T He=כרטיס מסך · OC, En=Graphics card · OC}" x:Name="NavGpu" Checked="Nav_Checked"/>
+                    <RadioButton Style="{StaticResource NavItem}" Tag="&#xE7F4;" Content="{l:T He=הגדרות NVIDIA, En=NVIDIA settings}" x:Name="NavNvidia" Checked="Nav_Checked"/>
+                    <RadioButton Style="{StaticResource NavItem}" Tag="&#xE706;" Content="{l:T He=תאורה · Lian Li, En=Lighting · Lian Li}" x:Name="NavLighting" Checked="Nav_Checked"/>
+                    <RadioButton Style="{StaticResource NavItem}" Tag="&#xE9D2;" Content="{l:T He=חיישנים וגרפים, En=Sensors and graphs}" x:Name="NavSensors" Checked="Nav_Checked"/>
+                    <RadioButton Style="{StaticResource NavItem}" Tag="&#xE945;" Content="{l:T He=אוטומציה · OSD, En=Automation · OSD}" x:Name="NavAutomation" Checked="Nav_Checked"/>
+                    <RadioButton Style="{StaticResource NavItem}" Tag="&#xE713;" Content="{l:T He=מערכת והגדרות, En=System and settings}" x:Name="NavSystem" Checked="Nav_Checked"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- ───────────── Main ───────────── -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="56"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Margin="24,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="PageTitle" Style="{StaticResource H1}" FontSize="19" VerticalAlignment="Center"/>
+
+                <Border Grid.Column="2" Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="3" VerticalAlignment="Center"
+                        WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="{l:T He=פרופיל קירור מאוחד — מחיל בבת אחת את כל המאווררים והמשאבה, En=Unified cooling profile — switches every fan and the pump at once}">
+                    <StackPanel Orientation="Horizontal" x:Name="ProfileBar">
+                        <TextBlock Text="&#xEC4A;" Style="{StaticResource Icon}" FontSize="13" Margin="8,0,6,0"/>
+                        <RadioButton Style="{StaticResource Chip}" GroupName="prof" Tag="silent" Content="{l:T He=שקט, En=Silent}" Checked="Profile_Checked"/>
+                        <RadioButton Style="{StaticResource Chip}" GroupName="prof" Tag="balanced" Content="{l:T He=מאוזן, En=Balanced}" Checked="Profile_Checked"/>
+                        <RadioButton Style="{StaticResource Chip}" GroupName="prof" Tag="performance" Content="{l:T He=ביצועים, En=Performance}" Checked="Profile_Checked"/>
+                        <RadioButton Style="{StaticResource Chip}" GroupName="prof" Tag="max" Content="{l:T He=מקסימום, En=Max}" Checked="Profile_Checked"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="18,0,12,0">
+                    <Border x:Name="TopCpuPill" Style="{StaticResource Pill}" Background="{StaticResource CardHi}" BorderThickness="1" BorderBrush="Transparent" Margin="0,0,6,0" ToolTip="{l:T He=טמפרטורת המעבד (Tctl), En=CPU temperature (Tctl)}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="TopCpuLbl" Text="CPU" Style="{StaticResource Caption}" Margin="0,0,6,0"/>
+                            <TextBlock x:Name="TopCpu" Text="—" Style="{StaticResource Num}" FontSize="12.5"/>
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="TopGpuPill" Style="{StaticResource Pill}" Background="{StaticResource CardHi}" BorderThickness="1" BorderBrush="Transparent" ToolTip="{l:T He=טמפרטורת ליבת כרטיס המסך, En=GPU core temperature}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="TopGpuLbl" Text="GPU" Style="{StaticResource Caption}" Margin="0,0,6,0"/>
+                            <TextBlock x:Name="TopGpu" Text="—" Style="{StaticResource Num}" FontSize="12.5"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Top">
+                    <Button Style="{StaticResource CaptionBtn}" Content="&#xE921;" Click="Min_Click"/>
+                    <Button Style="{StaticResource CaptionBtn}" x:Name="MaxBtn" Content="&#xE922;" Click="Max_Click"/>
+                    <Button Style="{StaticResource CaptionBtn}" Content="&#xE8BB;" Click="Close_Click" ToolTip="{l:T He=סגור (ממשיך לפעול במגש), En=Close (keeps running in the tray)}"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="1" Margin="24,0,24,0">
+                <Border x:Name="EmergencyBanner" Visibility="Collapsed" Background="{StaticResource HotSoft}" BorderBrush="#66F87171" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE7BA;" Style="{StaticResource Icon}" Foreground="{StaticResource Hot}" Margin="0,0,10,0"/>
+                        <TextBlock x:Name="EmergencyText" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+                <ItemsControl x:Name="ConflictBanners">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{StaticResource WarnSoft}" BorderBrush="#55FBBF24" BorderThickness="1" CornerRadius="10" Padding="14,8" Margin="0,0,0,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="&#xE7BA;" Style="{StaticResource Icon}" Foreground="{StaticResource Warn}" Margin="0,0,10,0"/>
+                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap">
+                                        <Run Text="{Binding Title, Mode=OneWay}" FontWeight="SemiBold"/>
+                                        <Run Text="{l:T He=פתוח ושולט ב, En=is open and controls}" Foreground="{StaticResource Muted}"/><Run Text="{Binding Affects, Mode=OneWay}" Foreground="{StaticResource Muted}"/><Run Text="{l:T He=. PulseWatch רק קורא את החיישנים האלה עד שהוא ייסגר., En=. PulseWatch only reads these sensors until it closes.}" Foreground="{StaticResource Muted}"/>
+                                    </TextBlock>
+                                    <Button Grid.Column="2" Content="{l:T He=סגור והעבר שליטה ל-PulseWatch, En=Close it and let PulseWatch take over}" Tag="{Binding Key}" Click="TakeOver_Click" Margin="12,0,0,0" Padding="12,5"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <ContentControl x:Name="Host" Grid.Row="2" Focusable="False"/>
+
+            <Border x:Name="Toast" Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,24" Visibility="Collapsed"
+                    Background="{StaticResource CardHi}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="12" Padding="18,11" MaxWidth="720">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.5" Color="Black"/>
+                </Border.Effect>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="ToastIcon" Text="&#xE73E;" Style="{StaticResource Icon}" Foreground="{StaticResource Good}" Margin="0,0,10,0"/>
+                    <TextBlock x:Name="ToastText" TextWrapping="Wrap" VerticalAlignment="Center" MaxWidth="640"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,108 @@
+<UserControl x:Class="PulseWatch.Views.LightingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:PulseWatch.Views">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,6,24,24">
+        <StackPanel>
+            <Border x:Name="NoDevice" Style="{StaticResource CardBorder}" Visibility="Collapsed" Margin="0,0,0,16">
+                <TextBlock Text="{v:T He=לא נמצא Lian Li Galahad II Trinity מחובר ב-USB. בדוק שכבל ה-USB של הבקר מחובר ללוח האם., En=No Lian Li Galahad II Trinity found on USB. Check that the controller USB cable is connected to the motherboard.}" TextWrapping="Wrap"/>
+            </Border>
+            <Border x:Name="BlockedNote" Background="{StaticResource WarnSoft}" CornerRadius="10" Padding="14,10" Margin="0,0,0,16" Visibility="Collapsed">
+                <TextBlock TextWrapping="Wrap" Foreground="#FDE68A" Text="{v:T He=L-Connect 3 פתוח ושולט בתאורה. השינויים כאן יישמרו ויוחלו ברגע שהוא ייסגר., En=L-Connect 3 is open and controls the lighting. Changes made here are saved and applied once it closes.}"/>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock x:Name="DeviceTitle" Text="תאורה" Style="{StaticResource H2}"/>
+                    <TextBlock x:Name="DeviceSub" Style="{StaticResource Hint}" Margin="0,4,0,14"/>
+                    <UniformGrid Columns="5" Margin="-5,0">
+                        <RadioButton x:Name="MUnchanged" Style="{StaticResource Chip}" GroupName="lm" Tag="unchanged" Checked="Mode_Checked" Margin="5,0" Padding="10,12">
+                            <StackPanel><TextBlock Text="&#xE711;" FontFamily="{StaticResource IconFont}" FontSize="18" HorizontalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/><TextBlock Text="{v:T He=לא לגעת, En=Leave as is}" HorizontalAlignment="Center" Margin="0,6,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="MCustom" Style="{StaticResource Chip}" GroupName="lm" Tag="custom" Checked="Mode_Checked" Margin="5,0" Padding="10,12">
+                            <StackPanel><TextBlock Text="&#xE790;" FontFamily="{StaticResource IconFont}" FontSize="18" HorizontalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/><TextBlock Text="{v:T He=אפקט מותאם, En=Custom effect}" HorizontalAlignment="Center" Margin="0,6,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="MThermal" Style="{StaticResource Chip}" GroupName="lm" Tag="thermal" Checked="Mode_Checked" Margin="5,0" Padding="10,12">
+                            <StackPanel><TextBlock Text="&#xE9CA;" FontFamily="{StaticResource IconFont}" FontSize="18" HorizontalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/><TextBlock Text="{v:T He=לפי טמפרטורה, En=By temperature}" HorizontalAlignment="Center" Margin="0,6,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="MMb" Style="{StaticResource Chip}" GroupName="lm" Tag="mbsync" Checked="Mode_Checked" Margin="5,0" Padding="10,12">
+                            <StackPanel><TextBlock Text="&#xE8EF;" FontFamily="{StaticResource IconFont}" FontSize="18" HorizontalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/><TextBlock Text="{v:T He=סנכרון לוח אם, En=Motherboard sync}" HorizontalAlignment="Center" Margin="0,6,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="MOff" Style="{StaticResource Chip}" GroupName="lm" Tag="off" Checked="Mode_Checked" Margin="5,0" Padding="10,12">
+                            <StackPanel><TextBlock Text="&#xE708;" FontFamily="{StaticResource IconFont}" FontSize="18" HorizontalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/><TextBlock Text="{v:T He=כבוי, En=Off}" HorizontalAlignment="Center" Margin="0,6,0,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel>
+                        </RadioButton>
+                    </UniformGrid>
+                    <TextBlock x:Name="ModeHelp" Style="{StaticResource Hint}" Margin="0,12,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Custom -->
+            <Grid x:Name="CustomPanel" Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource CardBorder}" x:Name="PumpCard"/>
+                <Border Grid.Column="2" Style="{StaticResource CardBorder}" x:Name="FansCard"/>
+            </Grid>
+
+            <!-- Thermal -->
+            <Border x:Name="ThermalPanel" Style="{StaticResource CardBorder}" Margin="0,16,0,0">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14"><TextBlock Text="{v:T He=צבע לפי טמפרטורה, En=Colour by temperature}" Style="{StaticResource H2}"/><v:HelpTip Help="{v:T He=המשאבה והמאווררים מחליפים צבע לפי החום: תכלת בקור → ירוק → כתום → אדום בחום. רואים במבט אחד אם המחשב עובד קשה., En=The pump and fans change colour with heat: cyan when cool → green → amber → red when hot. One glance shows how hard the PC is working.}"/></StackPanel>
+                    <DockPanel>
+                        <TextBlock Text="{v:T He=חיישן:, En=Sensor:}" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <ComboBox x:Name="ThermalSource" Width="260" HorizontalAlignment="Left" SelectionChanged="Thermal_Changed"/>
+                    </DockPanel>
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <DockPanel><TextBlock Text="{v:T He=קר (תכלת) מתחת, En=Cool (cyan) below}" Style="{StaticResource Caption}"/><TextBlock x:Name="ColdVal" Style="{StaticResource Num}" FontSize="13" HorizontalAlignment="Right"/></DockPanel>
+                            <Slider x:Name="ColdSlider" Minimum="20" Maximum="70" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Thermal_Changed"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <DockPanel><TextBlock Text="{v:T He=חם (אדום) מעל, En=Hot (red) above}" Style="{StaticResource Caption}"/><TextBlock x:Name="HotVal" Style="{StaticResource Num}" FontSize="13" HorizontalAlignment="Right"/></DockPanel>
+                            <Slider x:Name="HotSlider" Minimum="45" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Thermal_Changed"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
+                            <DockPanel><TextBlock Text="{v:T He=בהירות, En=Brightness}" Style="{StaticResource Caption}"/><TextBlock x:Name="ThermBrightVal" Style="{StaticResource Num}" FontSize="13" HorizontalAlignment="Right"/></DockPanel>
+                            <Slider x:Name="ThermBright" Minimum="1" Maximum="4" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="Thermal_Changed"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="0,18,0,0" Height="34" FlowDirection="LeftToRight" x:Name="GradientHost">
+                        <Border CornerRadius="8">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#00C8FF" Offset="0"/>
+                                    <GradientStop Color="#00FF8C" Offset="0.333"/>
+                                    <GradientStop Color="#FFAA00" Offset="0.666"/>
+                                    <GradientStop Color="#FF1E1E" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <Canvas>
+                            <Border x:Name="ThermMarker" Width="4" Height="44" Canvas.Top="-5" CornerRadius="2" Background="White">
+                                <Border.Effect><DropShadowEffect BlurRadius="6" ShadowDepth="0" Opacity="0.8"/></Border.Effect>
+                            </Border>
+                        </Canvas>
+                    </Grid>
+                    <DockPanel Margin="0,6,0,0" FlowDirection="LeftToRight">
+                        <TextBlock x:Name="GradCold" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="GradHot" Style="{StaticResource Caption}" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Ellipse x:Name="ThermNow" Width="16" Height="16" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="ThermNowText" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

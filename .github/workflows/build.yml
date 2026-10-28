@@ -1,0 +1,63 @@
+name: Build
+
+# Every push builds the Windows packages (downloadable from the run's artifacts).
+# A version tag (v2.0.1, …) also publishes them as a GitHub release.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Version
+        id: v
+        shell: pwsh
+        run: |
+          $v = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') } else { '2.0.0' }
+          "version=$v" >> $env:GITHUB_OUTPUT
+
+      # self-contained: no .NET install needed on the target PC
+      - name: Publish
+        run: dotnet publish native/PulseWatch.csproj -c Release -r win-x64 --self-contained true -p:Version=${{ steps.v.outputs.version }} -o publish
+
+      - name: Portable ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory dist -Force | Out-Null
+          New-Item -ItemType Directory portable -Force | Out-Null
+          Copy-Item publish/* portable -Recurse
+          Set-Content portable/portable -Value "Settings and log are kept in the Data folder next to PulseWatch.exe."
+          Compress-Archive portable/* "dist/PulseWatch-${{ steps.v.outputs.version }}-win-x64-portable.zip"
+
+      - name: MSI
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix build installer/PulseWatch.wxs -arch x64 -d Version=${{ steps.v.outputs.version }} -d "PublishDir=$PWD\publish" -o "dist/PulseWatch-${{ steps.v.outputs.version }}-win-x64.msi"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PulseWatch-${{ steps.v.outputs.version }}-windows
+          path: dist/*
+
+      - name: Release
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view $env:GITHUB_REF_NAME *> $null
+          if ($LASTEXITCODE -ne 0) { gh release create $env:GITHUB_REF_NAME --title "PulseWatch $env:GITHUB_REF_NAME" --notes-file installer/RELEASE_NOTES.md }
+          gh release upload $env:GITHUB_REF_NAME (Get-ChildItem dist/*).FullName --clobber
