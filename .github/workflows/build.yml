@@ -25,7 +25,8 @@ jobs:
         id: v
         shell: pwsh
         run: |
-          $v = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') } else { '2.0.0' }
+          $v = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') }
+               else { ([xml](Get-Content native/PulseWatch.csproj)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1 }
           "version=$v" >> $env:GITHUB_OUTPUT
 
       # self-contained: no .NET install needed on the target PC
@@ -45,7 +46,8 @@ jobs:
         shell: pwsh
         run: |
           dotnet tool install --global wix --version 5.0.2
-          wix build installer/PulseWatch.wxs -arch x64 -d Version=${{ steps.v.outputs.version }} -d "PublishDir=$PWD\publish" -o "dist/PulseWatch-${{ steps.v.outputs.version }}-win-x64.msi"
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          wix build installer/PulseWatch.wxs -ext WixToolset.UI.wixext -arch x64 -d Version=${{ steps.v.outputs.version }} -d "PublishDir=$PWD\publish" -o "dist/PulseWatch-${{ steps.v.outputs.version }}-win-x64.msi"
           Remove-Item dist/*.wixpdb -ErrorAction SilentlyContinue
 
       - uses: actions/upload-artifact@v4

@@ -1,10 +1,11 @@
 <!--
   PulseWatch MSI (WiX Toolset v5).
-  Build: wix build installer\PulseWatch.wxs -arch x64 -d Version=2.0.0 -d PublishDir=<publish folder> -o PulseWatch.msi
+  Build: wix build installer\PulseWatch.wxs -ext WixToolset.UI.wixext -arch x64 -d Version=2.0.0 -d PublishDir=<publish folder> -o PulseWatch.msi
+  Silent install with a language: msiexec /i PulseWatch.msi /qn APPLANG=he   (he | en)
   Per-machine install into Program Files, Start-menu shortcut, upgrades replace older versions.
   Uninstall also removes the "start with Windows" task the app may have created; settings in %AppData%\PulseWatch stay.
 -->
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="PulseWatch" Manufacturer="PulseWatch" Version="$(var.Version)"
            UpgradeCode="5E35EF60-6018-4258-92FD-5B07F9ACDD69" Scope="perMachine" Compressed="yes">
 
@@ -14,6 +15,42 @@
     <Icon Id="AppIcon" SourceFile="$(sys.SOURCEFILEDIR)..\native\Assets\pulsewatch.ico" />
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/AirZone1/PulseWatch" />
+
+    <!-- language of the app, picked on the Language page; defaults to the Windows language (1037 = Hebrew) -->
+    <Property Id="APPLANG" Value="en" Secure="yes" />
+    <Property Id="APPLANG_PICKED" Secure="yes" />
+    <SetProperty Id="APPLANG" Value="he" Before="CostInitialize" Sequence="both" Condition="UserLanguageID = 1037 AND NOT APPLANG_PICKED" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+    <UI Id="PulseWatchUI">
+      <ui:WixUI Id="WixUI_InstallDir" />
+      <!-- WixUI_InstallDir without the licence page, plus a Language page before the folder page -->
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LanguageDlg" Order="5" Condition="NOT Installed" />
+      <Publish Dialog="LanguageDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
+      <Publish Dialog="LanguageDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" />
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="LanguageDlg" Order="5" />
+
+      <Dialog Id="LanguageDlg" Width="370" Height="270" Title="!(loc.InstallDirDlg_Title)">
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)">
+          <Publish Property="APPLANG_PICKED" Value="1" />
+        </Control>
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Language" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Choose the language of PulseWatch. You can change it later in the app." />
+        <Control Id="LanguageChoice" Type="RadioButtonGroup" X="25" Y="70" Width="320" Height="50" Property="APPLANG">
+          <RadioButtonGroup Property="APPLANG">
+            <RadioButton Value="en" X="0" Y="0" Width="320" Height="18" Text="English" />
+            <RadioButton Value="he" X="0" Y="24" Width="320" Height="18" Text="Hebrew" />
+          </RadioButtonGroup>
+        </Control>
+      </Dialog>
+    </UI>
 
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="PulseWatch">
@@ -26,6 +63,8 @@
         <Shortcut Id="AppShortcut" Name="PulseWatch" Description="PulseWatch Control Center"
                   Target="[INSTALLFOLDER]PulseWatch.exe" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon" />
         <RegistryValue Root="HKLM" Key="Software\PulseWatch" Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+        <!-- read by the app on its first start -->
+        <RegistryValue Root="HKLM" Key="Software\PulseWatch" Name="Language" Type="string" Value="[APPLANG]" />
       </Component>
     </StandardDirectory>
 

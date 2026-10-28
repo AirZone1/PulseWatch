@@ -237,6 +237,21 @@ namespace PulseWatch.Core
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
+        /// <summary>
+        /// First start: the language picked in the installer (HKLM\Software\PulseWatch\Language), otherwise the
+        /// Windows display language (Hebrew → "he", anything else → "en"). Later it is changed on the System page.
+        /// </summary>
+        private static string FirstRunLanguage()
+        {
+            try
+            {
+                using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"Software\PulseWatch");
+                if (key?.GetValue("Language") is string l && l is "he" or "en") return l;
+            }
+            catch { }
+            return System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "he" ? "he" : "en";
+        }
+
         public static AppConfig Load()
         {
             AppConfig cfg;
@@ -244,7 +259,7 @@ namespace PulseWatch.Core
             {
                 cfg = File.Exists(AppPaths.ConfigFile)
                     ? JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(AppPaths.ConfigFile), Opts) ?? new AppConfig()
-                    : new AppConfig();
+                    : new AppConfig { Language = FirstRunLanguage() };
             }
             catch (Exception ex)
             {

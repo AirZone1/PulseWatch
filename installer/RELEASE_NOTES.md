@@ -1,7 +1,7 @@
 ## PulseWatch for Windows
 
 **Downloads**
-- `PulseWatch-…-win-x64.msi` — installer (Program Files, Start-menu shortcut).
+- `PulseWatch-…-win-x64.msi` — installer (Program Files, Start-menu shortcut, language page: English / Hebrew).
 - `PulseWatch-…-win-x64-portable.zip` — no install: unzip anywhere and run `PulseWatch.exe`. Settings stay in the `Data` folder next to it.
 
 Both include the .NET runtime — nothing else to install for the app itself.
