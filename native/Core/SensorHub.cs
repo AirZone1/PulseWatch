@@ -153,7 +153,8 @@ namespace PulseWatch.Core
             ("@gpu.hotspot", L.T("כרטיס מסך (GPU) · Hot Spot", "GPU · Hot Spot")),
             ("@gpu.memtemp", L.T("כרטיס מסך (GPU) · זיכרון VRAM", "GPU · VRAM")),
             ("@nvme.temp", L.T("כונן NVMe", "NVMe drive")),
-            ("@mb.temp", L.T("לוח אם · החיישן החם ביותר", "Motherboard · hottest sensor"))
+            ("@mb.temp", L.T("לוח אם · החיישן החם ביותר", "Motherboard · hottest sensor")),
+            ("@psu.temp", L.T("ספק כוח", "Power supply"))
         };
 
         /// <summary>Time stamps (unix seconds) of the last n samples, oldest first.</summary>
@@ -234,7 +235,7 @@ namespace PulseWatch.Core
             _lhm = new Computer
             {
                 IsCpuEnabled = true, IsGpuEnabled = !hasNvidia, IsMemoryEnabled = true, IsMotherboardEnabled = true,
-                IsControllerEnabled = controllers, IsStorageEnabled = true, IsNetworkEnabled = false, IsPsuEnabled = false
+                IsControllerEnabled = controllers, IsStorageEnabled = true, IsNetworkEnabled = false, IsPsuEnabled = true
             };
             _lhm.Open();
             BoardName = _lhm.Hardware.FirstOrDefault(h => h.HardwareType == HardwareType.Motherboard)?.Name;
@@ -342,14 +343,16 @@ namespace PulseWatch.Core
 
         /// <summary>
         /// LHM's controller scan takes ~9 s on this PC even with nothing attached, so it only runs when a USB device
-        /// of a supported fan-controller maker is present (HID list ~80 ms): NZXT, Aquacomputer, AeroCool, Razer PWM hub.
+        /// of a maker LHM 0.9.6 has a controller driver for is present (HID list ~80 ms): NZXT (Kraken V2/V3, Grid V3),
+        /// Aquacomputer (Octo, Quadro, D5 Next, Aquastream, Farbwerk, High Flow Next, MPS), AeroCool P7-H1, Arctic,
+        /// MSI (MAG/MEG Core Liquid AIOs) and the Razer PWM fan hub.
         /// </summary>
         private static bool FanControllerPresent()
         {
             try
             {
                 var hit = HidSharp.DeviceList.Local.GetHidDevices().FirstOrDefault(d =>
-                    d.VendorID is 0x1E71 or 0x0C70 or 0x2E97 || (d.VendorID == 0x1532 && d.ProductID == 0x0F3C));
+                    d.VendorID is 0x1E71 or 0x0C70 or 0x2E97 or 0x3904 or 0x0DB0 || (d.VendorID == 0x1532 && d.ProductID == 0x0F3C));
                 if (hit != null) Log.Info($"Fan controller found: VID {hit.VendorID:X4} PID {hit.ProductID:X4}");
                 return hit != null;
             }
@@ -571,6 +574,12 @@ namespace PulseWatch.Core
             Set("@nvme.temp", Id("virt/nvme/max"));
             Set("@aio.fan", Find(s => s.Id == "virt/aio/fan"));
             Set("@aio.pump", Find(s => s.Id == "virt/aio/pump"));
+            // power supply (Corsair HXi/RMi/AXi, MSI): total output, temperature, fan
+            bool Psu(SensorInfo s) => s.HardwareKind == "Psu";
+            Set("@psu.power", Find(s => Psu(s) && s.Type == "Power" && s.Name.Contains("Total", StringComparison.OrdinalIgnoreCase))
+                           ?? Find(s => Psu(s) && s.Type == "Power"));
+            Set("@psu.temp", Find(s => Psu(s) && s.Type == "Temperature"));
+            Set("@psu.fan", Find(s => Psu(s) && s.Type == "Fan"));
             Set("@net.down", Find(s => s.Id == "virt/net/down"));
             Set("@net.up", Find(s => s.Id == "virt/net/up"));
 
@@ -589,7 +598,7 @@ namespace PulseWatch.Core
                 foreach (var hw in _lhm.Hardware.SelectMany(h => h.SubHardware.Prepend(h)))
                 {
                     if (Skip(hw)) continue;
-                    if (hw.HardwareType is HardwareType.Cooler or HardwareType.GpuAmd or HardwareType.GpuIntel)
+                    if (hw.HardwareType is HardwareType.Cooler or HardwareType.GpuAmd or HardwareType.GpuIntel or HardwareType.Psu)
                     {
                         foreach (var ctrl in hw.Sensors.Where(x => x.SensorType == SensorType.Control && x.Control != null).OrderBy(x => x.Index))
                         {
@@ -746,7 +755,8 @@ namespace PulseWatch.Core
             lock (_sensorList)
             {
                 foreach (var s in _sensorList)
-                    if (s.HardwareKind == "SuperIO" && s.Type == "Temperature" && !s.CpuMirror && s.HasValue && (float.IsNaN(mbMax) || s.Value > mbMax)) mbMax = s.Value;
+                    // SuperIO plus the board's embedded controller (ASUS EC: VRM, chipset, T_Sensor, water in/out)
+                    if (s.HardwareKind is "SuperIO" or "EmbeddedController" && s.Type == "Temperature" && !s.CpuMirror && s.HasValue && (float.IsNaN(mbMax) || s.Value > mbMax)) mbMax = s.Value;
             }
             Sensor("virt/mb/max")?.Set(mbMax);
 

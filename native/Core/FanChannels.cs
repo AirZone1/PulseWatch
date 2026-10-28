@@ -73,7 +73,9 @@ namespace PulseWatch.Core
             Id = "lhm:" + control.Identifier;
             DefaultName = control.Name;
             bool gpu = hw.HardwareType is HardwareType.GpuAmd or HardwareType.GpuIntel;
-            Group = gpu ? L.T($"כרטיס מסך · {hw.Name}", $"Graphics card · {hw.Name}") : L.T($"בקר מאווררים · {hw.Name}", $"Fan controller · {hw.Name}");
+            Group = gpu ? L.T($"כרטיס מסך · {hw.Name}", $"Graphics card · {hw.Name}")
+                  : hw.HardwareType == HardwareType.Psu ? L.T($"ספק כוח · {hw.Name}", $"Power supply · {hw.Name}")
+                  : L.T($"בקר מאווררים · {hw.Name}", $"Fan controller · {hw.Name}");
             Kind = ChannelKind.Motherboard;
             MinPct = 0;
             RpmSensorId = fan?.Identifier.ToString();

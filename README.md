@@ -42,7 +42,16 @@ Both include the .NET runtime — nothing else to install for the app itself.
 | **Automation · OSD** | RivaTuner / Afterburner profiles | Cooling and OC profile per game (restored when the game exits), Windows notifications for high temperatures, hotkeys (Ctrl+Alt+1–4 profiles, Ctrl+Alt+F1–F5 OC profiles, Ctrl+Alt+O OSD), an always-on-top OSD (rows or one line, 3 sizes, any screen and corner, pick the values) with FPS measured through ETW like PresentMon (DirectX 9–12, foreground game or per screen; not over exclusive fullscreen) |
 | **System and settings** | — | Specs, drive health, vendor-app management, start with Windows, thermal safety net, power plan, HDD and NVMe read rates |
 
-**More hardware:** fan controllers LibreHardwareMonitor supports (NZXT Kraken/Grid, Aquacomputer, AeroCool, Razer) and AMD/Intel graphics cards show up automatically as channels and sensors. Motherboards without a profile work with generic names.
+**More hardware** (through LibreHardwareMonitor 0.9.6, detected automatically — sensors, and fan/pump control where the device allows it):
+
+| Kind | Supported |
+|---|---|
+| AIOs and fan controllers | NZXT Kraken (V2/V3) and Grid V3 · MSI MAG/MEG Core Liquid · Aquacomputer Octo, Quadro, D5 Next, Aquastream, Farbwerk, High Flow Next, MPS · Arctic · AeroCool P7-H1 · Razer PWM hub · T-Balancer · Heatmaster · Lian Li Galahad II Trinity (own driver) |
+| Power supplies | Corsair HXi / RMi / AXi (USB) · MSI — output power, temperature, fan |
+| Graphics cards | NVIDIA (full tuning) · AMD Radeon and Intel Arc / integrated (sensors and fans) |
+| Motherboards | the 332 models LibreHardwareMonitor knows (ASUS, MSI, ASRock, Gigabyte…) with their own header and sensor names, ASUS EC sensors (VRM, chipset, water); any other SuperIO board with generic names; Gigabyte X870I AORUS PRO ICE with a hand-made profile |
+
+Planned (experimental, needs testers with the hardware): AMD Radeon and Intel Arc tuning, Corsair Commander Core/XT, Lian Li UNI HUB and Galahad II LCD.
 
 **Unified profiles** (top bar and tray): Silent / Balanced / Performance / Max — each keeps its own setting for every fan channel.
 

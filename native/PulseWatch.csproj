@@ -14,7 +14,7 @@
     <ApplicationIcon>Assets\pulsewatch.ico</ApplicationIcon>
     <AssemblyName>PulseWatch</AssemblyName>
     <RootNamespace>PulseWatch</RootNamespace>
-    <Version>2.0.1</Version>
+    <Version>2.0.2</Version>
     <Product>PulseWatch Control Center</Product>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <!-- Footprint: a tray tool should be light. No background GC thread, precompiled code (less JIT CPU/RAM at start). -->

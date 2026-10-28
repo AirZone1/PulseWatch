@@ -61,6 +61,8 @@ namespace PulseWatch.Views
             new("nvme.temp", "sys", "NVMe", "NVMe", "@nvme.temp", "0", "°", "NVMe", 65, 75),
             new("aio.pump", "sys", "משאבה", "Pump", "@aio.pump", "0", " rpm", "Pump"),
             new("aio.fan", "sys", "מאווררי רדיאטור", "Radiator fans", "@aio.fan", "0", " rpm", "Rad"),
+            new("psu.power", "sys", "ספק כוח · הספק", "PSU power", "@psu.power", "0", " W", "PSU"),
+            new("psu.temp", "sys", "ספק כוח · טמפ'", "PSU temp", "@psu.temp", "0", "°", "PSU", 60, 70),
             new("ram.load", "sys", "עומס RAM", "RAM load", "@ram.load", "0", "%", "RAM"),
             new("ram.used", "sys", "RAM בשימוש", "RAM used", "@ram.used", "0.0", " GB", "RAM"),
         };
