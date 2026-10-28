@@ -46,6 +46,7 @@ jobs:
         run: |
           dotnet tool install --global wix --version 5.0.2
           wix build installer/PulseWatch.wxs -arch x64 -d Version=${{ steps.v.outputs.version }} -d "PublishDir=$PWD\publish" -o "dist/PulseWatch-${{ steps.v.outputs.version }}-win-x64.msi"
+          Remove-Item dist/*.wixpdb -ErrorAction SilentlyContinue
 
       - uses: actions/upload-artifact@v4
         with:
