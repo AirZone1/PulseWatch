@@ -97,7 +97,7 @@ Views/  one page per tab, plus the OSD window
 
 ## Building from source
 
-- .NET 8 SDK, then `update_native.bat` (builds into `bin\native_win64` and starts it), or
+- .NET 10 SDK, then `update_native.bat` (builds into `bin\native_win64` and starts it), or
   `cd native && dotnet publish -c Release -o ..\bin\native_win64`.
 - Release packages (MSI + portable ZIP) are built by GitHub Actions for every version tag (`v2.0.1`, …) — see
   `.github/workflows/build.yml` and `installer/`.
