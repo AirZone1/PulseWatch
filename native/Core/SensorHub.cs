@@ -832,8 +832,10 @@ namespace PulseWatch.Core
         {
             foreach (var ch in Channels)
             {
-                var app = Conflicts.Apps.FirstOrDefault(a => a.Key == ch.ConflictGroup);
-                bool blocked = app?.Running == true;
+                var app = Conflicts.Apps.FirstOrDefault(a => a.GroupKey == ch.ConflictGroup && a.Running);
+                bool blocked = app != null;
+                string? was = ch.BlockedBy;
+                if (blocked) ch.BlockedBy = app!.Title;
                 if (blocked != ch.Blocked)
                 {
                     ch.Blocked = blocked;
@@ -843,7 +845,8 @@ namespace PulseWatch.Core
                         ch.LastWrite = DateTime.MinValue;
                         ch.InAuto = true;
                         ch.AppliedPct = null;
-                        if (!initial) Notice?.Invoke(L.T($"{app?.Title} נסגר — PulseWatch שולט ב{ch.DefaultName}", $"{app?.Title} closed — PulseWatch now controls {ch.DefaultName}"));
+                        ch.BlockedBy = null;
+                        if (!initial) Notice?.Invoke(L.T($"{was} נסגר — PulseWatch שולט ב{ch.DefaultName}", $"{was} closed — PulseWatch now controls {ch.DefaultName}"));
                     }
                 }
             }

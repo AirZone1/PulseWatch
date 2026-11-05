@@ -180,7 +180,8 @@ namespace PulseWatch.Views
             if (sig == _conflictSig) return;
             _conflictSig = sig;
             ConflictsHost.Children.Clear();
-            foreach (var app in Conflicts.Apps)
+            // only what is on this PC: no "hand back control" for an app that was never installed
+            foreach (var app in Conflicts.Apps.Where(a => a.IsPresent()))
             {
                 var card = new Border { Style = (Style)FindResource("SubCard"), Margin = new Thickness(0, 8, 0, 0) };
                 var dp = new DockPanel();
@@ -189,8 +190,8 @@ namespace PulseWatch.Views
                 CheckBox? optional = null;
                 if (app.OptionalServices.Length > 0 && app.Running)
                 {
-                    optional = new CheckBox { Content = L.T("כולל EasyTune", "incl. EasyTune"), FontSize = 11.5, Margin = new Thickness(0, 0, 10, 0), VerticalAlignment = VerticalAlignment.Center,
-                        ToolTip = L.T("עוצר גם את שירות EasyTune Engine של GIGABYTE (מנוע הקירור של GCC)", "Also stops GIGABYTE's EasyTune Engine service (GCC's cooling engine)") };
+                    optional = new CheckBox { Content = L.T($"כולל {app.OptionalLabel}", $"incl. {app.OptionalLabel}"), FontSize = 11.5, Margin = new Thickness(0, 0, 10, 0), VerticalAlignment = VerticalAlignment.Center,
+                        ToolTip = L.T($"עוצר גם את השירות {app.OptionalLabel} של היצרן", $"Also stops the vendor's {app.OptionalLabel} service") };
                     buttons.Children.Add(optional);
                 }
                 if (app.Running)

@@ -136,9 +136,17 @@ namespace PulseWatch
             if (sender is RadioButton rb && _factories != null) Navigate(rb.Name);
         }
 
+        private List<AmdAdapter>? _amd;
+
         public void Navigate(string navName, Action<UserControl>? configure = null)
         {
             _currentNav = navName;
+            // a PC with an AMD card and no NVIDIA one gets the AMD page (looked up once the hub knows there is no NVIDIA card)
+            if (navName == "NavGpu" && App.Hub.Ready && App.Hub.Gpu == null)
+            {
+                _amd ??= AmdTuning.Detect();
+                if (_amd.Count > 0 && (!_views.TryGetValue(navName, out var cached) || cached is not AmdGpuView)) _views[navName] = new AmdGpuView(_amd);
+            }
             if (!_views.TryGetValue(navName, out var view))
             {
                 view = _factories[navName]();

@@ -21,6 +21,29 @@ namespace PulseWatch.Core
         public string[] ControlProcesses { get; init; } = Array.Empty<string>();
         public string[] Services { get; init; } = Array.Empty<string>();
         public string[] OptionalServices { get; init; } = Array.Empty<string>();
+        /// <summary>Name shown next to the "also stop these services" switch.</summary>
+        public string OptionalLabel { get; init; } = "";
+        /// <summary>Hardware this app fights over; apps in one group block the same channels. Empty = its own <see cref="Key"/>.</summary>
+        public string Group { get; init; } = "";
+        public string GroupKey => Group.Length > 0 ? Group : Key;
+
+        /// <summary>Running, or leaves a trace on this PC: known exe, or one of its services is registered. Others are not listed.</summary>
+        public bool IsPresent()
+        {
+            if (Running) return true;
+            string exe = ExePath ?? DefaultExe;
+            if (exe.Length > 0 && File.Exists(exe)) return true;
+            foreach (var svc in Services.Concat(OptionalServices))
+            {
+                try
+                {
+                    using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey($@"SYSTEM\CurrentControlSet\Services\{svc}");
+                    if (key != null) return true;
+                }
+                catch { }
+            }
+            return false;
+        }
         public string DefaultExe { get; init; } = "";
         public bool Running { get; internal set; }
         public string? ExePath { get; internal set; }
@@ -49,10 +72,34 @@ namespace PulseWatch.Core
             },
             new()
             {
-                Key = "gcc", Title = "GIGABYTE Control Center", AffectsHe = "מאווררי לוח האם (Smart Fan)", AffectsEn = "the motherboard fans (Smart Fan)",
+                Key = "gcc", Group = "board", Title = "GIGABYTE Control Center", AffectsHe = "מאווררי לוח האם (Smart Fan)", AffectsEn = "the motherboard fans (Smart Fan)",
                 Processes = new[] { "GCC" }, ControlProcesses = new[] { "GCC" },
-                OptionalServices = new[] { "EasyTuneEngineService" },
+                OptionalServices = new[] { "EasyTuneEngineService" }, OptionalLabel = "EasyTune",
                 DefaultExe = @"C:\Program Files\GIGABYTE\Control Center\GCC.exe"
+            },
+            // Names below come from public sources, not from a PC with these apps: a wrong name only means the app is
+            // not noticed (as before), it cannot block anything else. No DefaultExe where the install path varies.
+            new()
+            {
+                // AsusFanControlService = the Fan Xpert engine (Armoury Crate and AI Suite); ArmouryAIOFanServer = AIO fans
+                Key = "armoury", Group = "board", Title = "ASUS Armoury Crate / Fan Xpert", AffectsHe = "מאווררי לוח האם", AffectsEn = "the motherboard fans",
+                Processes = new[] { "ArmouryCrate", "ArmouryAIOFanServer", "AsusFanControlService" },
+                ControlProcesses = new[] { "ArmouryCrate", "ArmouryAIOFanServer", "AsusFanControlService" },
+                Services = new[] { "AsusFanControlService" },
+                OptionalServices = new[] { "ArmouryCrateService", "ArmouryCrateControlInterface" }, OptionalLabel = "Armoury Crate Service"
+            },
+            new()
+            {
+                // the short service name is not documented, so both spellings are tried
+                Key = "msicenter", Group = "board", Title = "MSI Center", AffectsHe = "מאווררי לוח האם", AffectsEn = "the motherboard fans",
+                Processes = new[] { "MSI.CentralServer", "MSI.TerminalServer", "MSI_Central_Service" },
+                ControlProcesses = new[] { "MSI.CentralServer" },
+                Services = new[] { "MSI Central Service", "MSI_Central_Service" }
+            },
+            new()
+            {
+                Key = "atuning", Group = "board", Title = "ASRock A-Tuning", AffectsHe = "מאווררי לוח האם", AffectsEn = "the motherboard fans",
+                Processes = new[] { "ATuning", "AsrXTU" }, ControlProcesses = new[] { "ATuning", "AsrXTU" }
             }
         };
 
