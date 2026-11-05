@@ -4,6 +4,7 @@
 !/.github/
 !/native/
 !/installer/
+!/docs/
 !/README.md
 !/THIRD-PARTY-NOTICES.md
 !/update_native.bat
