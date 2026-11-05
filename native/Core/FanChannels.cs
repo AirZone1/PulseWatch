@@ -25,6 +25,8 @@ namespace PulseWatch.Core
         public double? AppliedPct { get; internal set; }
         public bool InAuto { get; internal set; } = true;
         public bool Blocked { get; internal set; }
+        /// <summary>Title of the vendor app that holds this channel while <see cref="Blocked"/>.</summary>
+        public string? BlockedBy { get; internal set; }
         public string? LastError { get; internal set; }
         public double? SourceTemp { get; internal set; }
         public double? TargetPct { get; internal set; }
@@ -47,7 +49,7 @@ namespace PulseWatch.Core
             DefaultName = name ?? control.Name;
             Group = L.T($"לוח אם · {chipName}", $"Motherboard · {chipName}");
             Kind = kind;
-            ConflictGroup = "gcc";
+            ConflictGroup = "board";
             MinPct = 0;
             // the tach sensor may not be active yet when the fan was stopped at start-up; its id is predictable
             RpmSensorId = fan?.Identifier.ToString() ?? control.Identifier.ToString().Replace("/control/", "/fan/");

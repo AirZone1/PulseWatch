@@ -536,8 +536,8 @@ namespace PulseWatch.Views
             LiveState.Foreground = Ui.Res(ch.Emergency ? "Hot" : ch.Blocked ? "Warn" : "Text");
             ErrorBox.Visibility = ch.LastError != null || ch.Blocked ? Visibility.Visible : Visibility.Collapsed;
             ErrorText.Text = ch.Blocked
-                ? L.T($"{Conflicts.Apps.FirstOrDefault(x => x.Key == ch.ConflictGroup)?.Title} פתוח ושולט בערוץ הזה. השינויים יישמרו ויוחלו ברגע שהוא ייסגר.",
-                      $"{Conflicts.Apps.FirstOrDefault(x => x.Key == ch.ConflictGroup)?.Title} is open and controls this channel. Changes are saved and applied as soon as it closes.")
+                ? L.T($"{ch.BlockedBy} פתוח ושולט בערוץ הזה. השינויים יישמרו ויוחלו ברגע שהוא ייסגר.",
+                      $"{ch.BlockedBy} is open and controls this channel. Changes are saved and applied as soon as it closes.")
                 : ch.LastError ?? "";
 
             CurveEditor.LiveTemp = ch.SourceTemp;

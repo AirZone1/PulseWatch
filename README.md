@@ -48,10 +48,10 @@ Both include the .NET runtime — nothing else to install for the app itself.
 |---|---|
 | AIOs and fan controllers | NZXT Kraken (V2/V3) and Grid V3 · MSI MAG/MEG Core Liquid · Aquacomputer Octo, Quadro, D5 Next, Aquastream, Farbwerk, High Flow Next, MPS · Arctic · AeroCool P7-H1 · Razer PWM hub · T-Balancer · Heatmaster · Lian Li Galahad II Trinity (own driver) |
 | Power supplies | Corsair HXi / RMi / AXi (USB) · MSI — output power, temperature, fan |
-| Graphics cards | NVIDIA (full tuning) · AMD Radeon and Intel Arc / integrated (sensors and fans) |
+| Graphics cards | NVIDIA (full tuning) · AMD Radeon (sensors, fans, and experimental tuning: clocks, voltage offset, memory, power limit, on PCs without an NVIDIA card) · Intel Arc / integrated (sensors and fans) |
 | Motherboards | the 332 models LibreHardwareMonitor knows (ASUS, MSI, ASRock, Gigabyte…) with their own header and sensor names, ASUS EC sensors (VRM, chipset, water); any other SuperIO board with generic names; Gigabyte X870I AORUS PRO ICE with a hand-made profile |
 
-Planned (experimental, needs testers with the hardware): AMD Radeon and Intel Arc tuning, Corsair Commander Core/XT, Lian Li UNI HUB and Galahad II LCD.
+AMD tuning follows AMD's documentation and has not been run on a Radeon card yet — reports welcome. Planned (experimental, needs testers with the hardware): Intel Arc tuning, Corsair Commander Core/XT, Lian Li UNI HUB and Galahad II LCD.
 
 **Unified profiles** (top bar and tray): Silent / Balanced / Performance / Max — each keeps its own setting for every fan channel.
 
@@ -74,7 +74,7 @@ How: the NVIDIA card is read directly (NVML + NvAPI, ~1.5 ms instead of 86 ms th
 - **Thermal safety net** for what does not react to heat, at the hardware limit (default: the CPU's and the card's own maximum temperature): CPU at its limit → radiator fans on a fixed speed go to 100%; graphics card at its limit → its fans on fixed/auto and the system fans that follow it go to 100%. The pump always stays where you set it. Back to normal 6 °C below the limit.
 - **Missing sensor** → the channel that follows it goes to 100%.
 - **On exit:** motherboard and GPU fans return to BIOS/driver control; the Galahad pump goes to 100% and its fans to the chosen value (default 60%), since the AIO has no automatic mode of its own.
-- **Vendor apps:** while Afterburner / L-Connect / GCC run, PulseWatch switches to read-only for their hardware (two programs on one fan make it jump). "Close and take over" closes them; "Give back" starts them again.
+- **Vendor apps:** while Afterburner / L-Connect / GCC / ASUS Armoury Crate or Fan Xpert / MSI Center / ASRock A-Tuning run, PulseWatch switches to read-only for their hardware (two programs on one fan make it jump). "Close and take over" closes them; "Give back" starts them again.
 - **NVIDIA backup:** before the first change the driver settings are backed up to `%AppData%\PulseWatch\nvidia-settings-backup.nvidia`.
 
 ## Code layout (`native/`)
