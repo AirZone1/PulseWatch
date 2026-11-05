@@ -1,10 +1,10 @@
 # Porting PulseWatch to Linux and macOS
 
-**Status:** plan only, nothing here is implemented. Written 2026-11-03 against PulseWatch 2.0.2 (commit `5e8c351`).
+**Status:** plan only, nothing here is implemented. Written 2026-11-03 against PulseWatch 2.0.2 (commit `5e8c351`). Line counts are from that version; the AMD notes also cover 2.0.3.
 
 ## Summary
 
-- **Linux is worth doing.** Most of the app can reach parity. The real losses are the NVIDIA driver settings page and system-wide FPS. AMD tuning could end up better than on Windows.
+- **Linux is worth doing.** Most of the app can reach parity. The real losses are the NVIDIA driver settings page and system-wide FPS.
 - **macOS would be a much smaller product:** monitoring, plus maybe Mac fan control. No Mac has a motherboard fan header, an NVIDIA card or a socket for a Galahad II. Decide on it after Linux ships.
 - **The hard part is not the hardware calls.** It is moving about 7,150 lines of WPF to Avalonia and splitting the one elevated process into a root daemon and a normal-user UI.
 - **First milestone:** Linux monitoring plus Galahad II control, with no root and one udev rule (see [Phase 2](#phase-2--first-milestone-linux-monitoring--galahad-ii)).
@@ -157,7 +157,7 @@ Platform limits to design around:
 | NVIDIA telemetry | NVML | NVML, same calls | None |
 | NVIDIA power, fans, offsets | NVML + NvAPI | NVML | Root |
 | NVIDIA V/F, hot spot, VRAM | Private NvAPI | Private NvAPI via `libnvidia-api.so` | Root (per nvcurve) |
-| AMD GPU | LHM | amdgpu hwmon + sysfs | Root to write |
+| AMD GPU | LHM, plus experimental tuning through ADL (`AmdTuning.cs`, 2.0.3) | amdgpu hwmon + sysfs | Root to write |
 | NVMe temperature | LHM | hwmon `nvme` | None |
 | SATA temperature | LHM SMART | hwmon `drivetemp`, or `smartctl` | None / root |
 | Galahad II | HidSharp | HidSharp over hidraw | udev rule |
@@ -219,7 +219,7 @@ The [amdgpu documentation](https://docs.kernel.org/gpu/amdgpu/thermal.html) list
 - **Reads:** `temp*_input`, `fan1_input`, `power1_average`/`power1_input`, `in0_input`, `freq1_input`, `freq2_input`, `gpu_busy_percent`, `mem_busy_percent`.
 - **Writes:** `pwm1` with `pwm1_enable`, `power1_cap`, `fan_curve`, `pp_od_clk_voltage`.
 
-Windows PulseWatch only offers AMD sensors and fans, so Linux could do more. Overdrive usually requires a boot parameter (`amdgpu.ppfeaturemask`, Background; LACT publishes a guide). Newer cards may need `fan_curve` instead of `pwm1` (Test).
+Windows PulseWatch gained experimental AMD tuning in 2.0.3 through ADL Overdrive 8 (`atiadlxx.dll`). That library is Windows-only, so `AmdTuning.cs` does not port, though `AmdGpuView` may be reusable. Overdrive usually requires a boot parameter (`amdgpu.ppfeaturemask`, Background; LACT publishes a guide). Newer cards may need `fan_curve` instead of `pwm1` (Test).
 
 Intel: sensors only, whatever the `i915`/`xe` hwmon exposes.
 
@@ -330,7 +330,7 @@ Distribution: direct download only, because private APIs rule out the App Store.
 | NVIDIA V/F curve, hot spot, VRAM | Yes (private API) | Experimental | — |
 | NVIDIA driver settings | Yes | **No** | — |
 | Digital vibrance | Yes | X11 only | — |
-| AMD GPU | Sensors, fans | Sensors, fans; tuning possible | — |
+| AMD GPU | Sensors, fans; experimental tuning | Sensors, fans; tuning possible | — |
 | NVMe temperature | Yes | Yes | Limited |
 | SATA temperature, keep HDD asleep | Yes | Temperature with module; keep-asleep **no** | — |
 | Per-game profiles | Yes | Yes (Proton needs work) | Low value |
